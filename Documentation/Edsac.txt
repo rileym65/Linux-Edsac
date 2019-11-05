@@ -1,0 +1,1391 @@
+Perforator           Teleprinter           Binary    Decimal
+Letter figure        Letter Figure
+P      0             P      0              00000     0
+Q      1             Q      1              00001     1
+W      2             W      2              00010     2
+E      3             E      3              00011     3
+R      4             R      4              00100     4
+T      5             T      5              00101     5
+Y      6             Y      6              00110     6
+U      7             U      7              00111     7
+I      8             I      8              01000     8
+O      9             O      9              01001     9
+J                    J                     01010     10
+#                    Figure shift          01011     11
+S                    S      "              01100     12
+Z                    Z      +              01101     13
+K                    K      (              01110     14
+*                    Letter shift          01111     15
+.                                          10000     16
+F                    F      $              10001     17
+@                    CR                    10010     18
+D                    D      ;              10011     19
+!                    <space>               10100     20
+H      +             H      <LB>           10101     21
+N      -             N      ,              10110     22
+M                    M      .              10111     23
+&                    LF                    11000     24
+L                    L      )              11001     25
+X                    X      /              11010     26
+G                    G      #              11011     27
+A                    A      -              11100     28
+B                    B      ?              11101     29
+C                    C      :              11110     30
+V                    V      =              11111     31
+
+Commands:
+AnS     A += m[n]            AnL    AB += w[n]
+SnS     A -= m[n]            SnL    AB -= w[n]
+HnS     R  = m[n]            HnL    RS  = w[n]
+VnS     AB += m[n] * R       VnL    ABC += w[n] * RS
+NnS     AB -= m[n] * R       NnL    ABC -= w[n] * RS
+TnS     m[n] = A, ABC = 0    TnL    w[n] = AB, ABC = 0
+UnS     m[n] = A             UnL    w[n] = AB
+CnS     AB += m[n] & R       CnL    ABC += w[n] & RS
+RnS,RnL Shift ABC right arithmetically
+LnS,LnL Shift ABC left arithmetically
+EnS     if A >= 0 goto n
+GnS     if a < 0 goto n
+InS     readch()->least significant 5 bits of m[n]
+OnS     Ouput the character in most significant 5 bits of m[n]
+FnS     Verify the last character output
+XS      No Operation
+YS      Add 1 to bit position 35 of ABC, counting the sign bit as bit zero
+ZS      Stop machine and ring bell
+
+Shift values:
+
+    0 L    - 1
+    1 S    - 2
+    2 S    - 3
+    4 S    - 4
+    8 S    - 5
+   16 S    - 6
+   32 S    - 7
+   64 S    - 8
+  128 S    - 9
+  256 S    - 10
+  512 S    - 11
+ 1024 S    - 12
+
+Setting up a wheeler jump (subroutine call/return)
+
+[Main]
+[m  ]  A   m F    | Pick up self
+[m+1]  G   n F    | Jump to subroutine
+[m+2]             | Control returns here
+
+[Subroutine]
+[n  ]  A   3 F    | Form return link
+[n+1]  T   p F    | Plant return link
+          .
+          .
+          .
+[p  ]     .       | Return link planted here
+
+Initial Orders 1 setup
+
+31      TnS                 Where n=last address used +1
+
+Initial Orders 2 codes
+
+        T  m K              Set load point to m
+        G    K              Set the @ parameter to current load point
+        T    Z              Restore the @ parameter
+        E  m K P F          Enter program at location m
+        E    Z P F          Enter program at location @
+        P    Z              ???
+        P    K              ???
+
+To set offset addresses in Initial Orders 2:
+
+  [44]  P {addr} F          [ Offset associated with !        ]
+  [45]  P {addr} F          [ Offset associated with H        ]
+  [46]  P {addr} F          [ Offset associated with N        ]
+  [47]  P {addr} F          [ Offset associated with M        ]
+  [48]  P {addr} F          [ Offset associated with &        ]
+  [49]  P {addr} F          [ Offset associated with L        ]
+  [50]  P {addr} F          [ Offset associated with X        ]
+  [51]  P {addr} F          [ Offset associated with G        ]
+  [52]  P {addr} F          [ Offset associated with A        ]
+  [53]  P {addr} F          [ Offset associated with B        ]
+  [54]  P {addr} F          [ Offset associated with C        ]
+  [55]  P {addr} F          [ Offset associated with V        ]
+
+Programs using Initial Orders 2 should load at addresses 64 and up
+
+
+tank starting addresses:
+tank 0  =   0
+tank 1  =  32
+tank 2  =  64
+tank 3  =  96
+tank 4  = 128
+
+Test programs, used for comparison of emulators:
+
+[31]    T  35 S
+[32]    A  34 S
+[33]    Z     S
+[34]    A   5 S
+
+[31]  T  37 S
+[32]  O  36 S
+[33]  F  42 S
+[34]  A  42 S
+[35]  Z     S
+[36]  A     S
+
+[31]  T  37 S
+[32]  A  35 S
+[33]  Y     S
+[34]  Z     S
+[35]  A   5 L
+
+
+
+
+
+Test program #1 - Read one character from tape and print it (Initial Orders 1)
+
+[31]    T40S       [ Needed for IO1 and clear acc ]
+[32]    I64S       [ Read next from tape into m(64) ]
+[33]    A64S       [ Load character into acc ]
+[34]    L1024S     [ Shift to 5 most significant bits ]
+[35]    U64S       [ Store back into m(64) ]
+[36]    O39S       [ Output # to set teleprinter to symbol mode ]
+[37]    O64S       [ Output read character to teleprinter ]
+[38]    ZS         [ End the program ]
+[39]    #S         [ # character constant for symbol mode ]
+6
+
+Test program #2 - Count from 1 to 9 ( Initial Orders 1)
+
+[31]    T50S       [ Needed for IO1 and clear acc ]
+[32]    O44S       [ Output # to set teleprinter to symbol mode ]
+[33]    A45S       [ Get next number ]
+[34]    L512S      [ Shift for output ]
+[35]    T46S       [ WRite for output and clear acc ]
+[36]    O46S       [ Send to printer ]
+[37]    O47S       [ Send carriage return ]
+[38]    A45S       [ get current number ]
+[39]    A48S       [ Add 1 to it ]
+[40]    U45S       [ Store it ]
+[41]    S49S       [ Need to see if it is 10 yet ]
+[42]    G31S       [ Loop back if not ]
+[43]    ZS         [ End the program]
+[44]    #S         [ # character constant for symbol mode ]
+[45]    P1S        [ place for counting ]
+[46]    PS         [ Place to store character for output ]
+[47]    &S         [ Character constant for CR ]
+[48]    P1S        [ 1 constant ]
+[49]    P10S       [ 10 constant ]
+
+Test program #3 - Count from 1 to 9 ( Initial Orders 2)
+
+[64]    T64K       [ Needed for IO1 and clear acc ]
+[64]    T63F       [ Clear the accumulator ]
+[65]    O77F       [ Output # to set teleprinter to symbol mode ]
+[66]    A78F       [ Get next number ]
+[67]    L512F      [ Shift for output ]
+[68]    T79F       [ WRite for output and clear acc ]
+[69]    O79F       [ Send to printer ]
+[70]    O80F       [ Send carriage return ]
+[71]    A78F       [ get current number ]
+[72]    A81F       [ Add 1 to it ]
+[73]    U78F       [ Store it ]
+[74]    S82F       [ Need to see if it is 10 yet ]
+[75]    G64F       [ Loop back if not ]
+[76]    ZF         [ End the program]
+[77]    #F         [ # character constant for symbol mode ]
+[78]    P1F        [ place for counting ]
+[79]    PF         [ Place to store character for output ]
+[80]    &F         [ Character constant for CR ]
+[81]    P1F        [ 1 constant ]
+[82]    P10F       [ 10 constant ]
+[83]    E64K       [ Enter program at 64 ]
+[84]    P  F
+
+Test program #4 - Count from 1 to 9 ( Initial Orders 2)
+
+        T  64 K       [ Needed for IO1 and clear acc ]
+        G     K       [ Set delta parameter ]
+[0]     T  21 @       [ Clear the accumulator ]
+[1]     O  13 @       [ Output # to set teleprinter to symbol mode ]
+[2]     A  14 @       [ Get next number ]
+[3]     L 512 F       [ Shift for output ]
+[4]     T  15 @       [ WRite for output and clear acc ]
+[5]     O  15 @       [ Send to printer ]
+[6]     O  16 @       [ Send carriage return ]
+[7]     A  14 @       [ get current number ]
+[8]     A  17 @       [ Add 1 to it ]
+[9]     U  14 @       [ Store it ]
+[10]    S  18 @       [ Need to see if it is 10 yet ]
+[11]    G   0 @       [ Loop back if not ]
+[12]    Z     F       [ End the program]
+[13]    #     F       [ # character constant for symbol mode ]
+[14]    P   1 F       [ place for counting ]
+[15]    P     F       [ Place to store character for output ]
+[16]    &     F       [ Character constant for CR ]
+[17]    P   1 F       [ 1 constant ]
+[18]    P  10 F       [ 10 constant ]
+[19]    E     Z       [ Enter at delta parameter ]
+[20]    P     F
+
+Test program #5 - Test C function ( Initial Orders 2)
+        T  64 K       [ Set load position ]
+        G     K       [ Set delta parameter ]
+[0]     T  63 F       [ Clear the accumulator ]
+[1]     E   4 @       [ jump past data ]
+[2]     P   5 F       [ data 5 ]
+[3]     P   6 F       [ data 6 ]
+[4]     H   2 @       [ Load 5 into R ]
+[5]     C   3 @       [ And it with 6 ]
+[6]     Z     F       [ End program ]
+[7]     E     Z       [ Enter at load point ]
+[8]     P     F
+
+Test program #6 - Compare two numbers for equal (Initial Orders 2)
+        T  64 K       [ Set load position ]
+        G     K       [ Set delta parameter ]
+[0]     T  63 F       [ Clear accumulator ]
+[1]     E   8 @       [ Jump past constants ]
+[2]     P   5 F       [ Data 5 ]
+[3]     P   6 F       [ Data 6 ]
+[4]     Y   0 F       [ Data 'Y' ]
+[5]     N   0 F       [ Data 'N' ]
+[6]     P   1 F       [ Data 1 ]
+[7]     *   0 F       [ Figure shift mode ]
+[8]     O   7 @       [ Force figure shift on output ]
+[9]     A   2 @       [ SEt accumulator to first value ]
+[10]    S   3 @       [ Compare to second value ]
+[11]    G  14 @       [ jump if negative resulted ]
+[12]    S   6 @       [ If zero, then subtracting 1 will make negative
+[13]    G  16 @       [ jump if it really was zero ]
+[14]    O   5 @       [ Indicate numbers did not match ]
+[15]    Z     F       [ and stop ]
+[16]    O   4 @       [ Indicate that numbers did match ]
+[17]    Z     F       [ and stop ]
+        E     Z
+        P     F
+
+
+
+Initial Orders 1 Listing:
+05000   00101 0 0000000000 0    0    T    S     Clears accumulator and puts 10/32 in multiplier
+15004   10101 0 0000000010 0    1    H  2 S       register
+05000   00101 0 0000000000 0    2    T    S     Control switched to 6. Locations 0-3 are then
+0300c   00011 0 0000000110 0    3    E  6 S       used as 'working space'
+00002   00000 0 0000000001 0    4    P  1 S     2^-15 constant
+0000a   00000 0 0000000101 0    5    P  5 S     10*2^-16 constant
+05000   00101 0 0000000000 0    6    T    S     \
+08000   01000 0 0000000000 0    7    I    S      Input function digits to their correct digital
+1c000   11100 0 0000000000 0    8    A    S       position in 0
+04020   00100 0 0000010000 0    9    R 16 S      |
+05001   00101 0 0000000000 1    10   T    L     /
+08004   01000 0 0000000010 0    11   I  2 S    Reads character on the tape and test whether
+1c004   11100 0 0000000010 0    12   A  2 S      it is numerically less than 10
+0c00a   01100 0 0000000101 0    13   S  5 S     /
+0302a   00011 0 0000010101 0    14   E 21 S    /
+05006   00101 0 0000000011 0    15   T  3 S    Clears accumulator using 3 as a rubbish dump
+1f002   11111 0 0000000001 0    16   V  1 S    One stage of the binary-decimal conversion. New
+19010   11001 0 0000001000 0    17   L  8 S      partial address is obtained by taking ten times
+1c004   11100 0 0000000010 0    18   A  2 S      old partial address and adding the next digit
+05002   00101 0 0000000001 0    19   T  1 S    /
+03016   00011 0 0000001011 0    20   E 11 S    Transfers control to location 11
+04008   00100 0 0000000100 0    21   R  4 S    Control is transferred to 21 from the order 14
+                                                  when character read is S or L.  When L has been
+                                                  read the 17th digit of the accumulator is a 1,
+                                                  when S has been read it is a 0
+1c002   11100 0 0000000001 0    22   A  1 S    The address has been formed x s^-16 and so needs
+19001   11001 0 0000000000 1    23   L    L      doubling
+1c000   11100 0 0000000000 0    24   A    S    Forms the complete order in the accumulator
+0503e   00101 0 0000011111 0    25   T 31 S    Transfers the order to its final position in store
+1c032   11100 0 0000011001 0    26   A 25 S    Incresses the address specified in order 25
+1c008   11100 0 0000000100 0    27   A  4 S      by 1; eg. T31S is replaced by T32S
+07032   00111 0 0000011001 0    28   U 25 S      and so on
+0c03e   01100 0 0000011111 0    29   S 31 S    Tests whether all orders have been taken in.
+1b00c   11011 0 0000000110 0    30   G  6 S      Location 31 contains orders T (n+1) S, the
+                                                 first order ton be placed in the store: and so
+                                                 C(Acc) will be positive only when all oderrs
+                                                 have been taken into the store
+
+
+Initial Orders 2 Listing
+05000  [ 0]   T    F    These order cause control to be transferred
+03028  [ 1]   E 20 F      to 20.  they are not used after the start, but
+                          their locations are used as working space.
+00002  [ 2]   P  1 F    These are constants which are intended to be
+07004  [ 3]   U  2 F      left here unaltered in any program
+1c04e  [ 4]   A 39 F    Input of address.  This group of orders is en-
+04008  [ 5]   R  4 F      tered at 8 with the accumulator empty, so
+1f000  [ 6]   V    F      that 0 is cleared. The next digit on the tape
+19010  [ 7]   L  8 F      is taken in and tested to see if it is less than
+05000  [ 8]   T    F      eleven; if so it is doubled and added to ten
+08002  [ 9]   I  1 F      times the content of 0, the sum being sent
+1c002  [10]   A  1 F      back to 0.  the next digit is read, tested, etc.,
+0c04e  [11]   S 39 F      and this is continued until the whole addreess
+1b008  [12]   G  4 F      has been formed; the next digit read, x, is
+                          greater than ten and so corresponds to a 
+                          code letter
+19001  [13]   L    D    These test to see if x is greater than sixteen.
+0c04e  [14]   S 39 F      If it is, the order A(24+x)F is formed and
+03022  [15]   E 17 F      planted in 20.  If x is sixteen or less a switch
+0c00e  [16]   S  7 F      order E(16+x)F is formed and planted in 20.
+1c046  [17]   A 35 F     /
+05028  [18]   T 20 F    /
+1c000  [19]   A    F    This adds the address, which is always positive,
+                          into the accumulator.
+15010  [20]   H  8 F    This order places 10/32 in the multiplier regis-
+                          ter during the start and is later replaced by a
+                          manufactured one which either adds to the
+                          accumulator the number determined by x, or
+                          switches control to an address determined by x.
+1c050  [21]   A 40 F    this adds in the function digits of the order so
+                          the accumulator now contains the order from
+                          the tape plus the number selected by x.
+05056  [22]   T 43 F    This (the transfer order) transfers the assembled
+                          order to its final place in the store
+1c02c  [23]   A 22 F    These orders increase the address specified in
+1c004  [24]   A  2 F      the transfer order by unity.
+0502c  [25]   T 22 F    /
+03044  [26]   E 34 F    Transfers control to 34.
+1c056  [27]   A 43 F    Control is switched to these orders by 20 when
+03010  [28]   E  8 F      pi has been read from the tape.  They add 2^-16
+                          to the address (which is in the accumulator)
+                          and transfer control to 8.  the address now
+                          refers to a long storage location.
+1c054  [29]   A 42 F    This adds the address in 42 to the accumulator
+1c050  [30]   A 40 F    This adds the function digits of the order to the
+                          accumulator.  The result is that the number in
+                          the accumulator is positive if the order has
+                          function digits represented by T or E, while
+                          it is negative in the case of G.
+03032  [31]   E 25 F    If the accumulator is positive, the order in the
+1c02c  [32]   A 22 F      accumulator replaces the order in 22; if nega-
+05054  [33]   T 42 F      tive the accumulator contains the address spe-
+                          cified in order 22 which is then put in 42 (the
+                          storage location corresponding to @).
+08051  [34]   I 40 D    These take in the function digits, shift them to
+1c051  [35]   A 40 D      their correct place and transfer them to 40.
+04020  [36]   R 16 F      The order in 35 is also used as a constant.
+05051  [37]   T 40 D     /
+03010  [38]   E  8 F    /
+0000b  [39]   P  5 D    A constant used in the input of the address.  It
+                          equals 11.2^-16
+00001  [40]   P    D    A constant used during the start.  It equals 2^-16
+
+
+Diagnostic section numbers
+100  - E,G
+200  - A,S
+300  - T,U
+400  - R,L
+500  - C,H
+600  - V,N
+700  - I,O
+800  - F,Y
+
+1100 - EL,GL
+1200 - AL,SL
+1300 - TL,UL
+1400 - RL,LL
+1500 - CL,HL
+1600 - VL,NL
+1700 - IL,OL
+1800 - FL,YL
+
+      T 64 K
+      G    K
+[0]   T 63 F
+[1]   E  4 @
+[2]   V    F     [ 11111 ]
+[3]   V    F     [ 01111 ]
+[4]   A  2 @
+[5]   A  3 @
+[6]   Z    F
+      E    Z
+      P    F
+
+[ Diagnostic group 100 ]
+[31]    T 127 S       [ Set last position ]
+[32]    O  50 S       [ Set teleprinter into figure mode ]
+
+        [ Test 101 - E for A = 0 ]
+[33]    O  41 S       [ Output test number ]
+[34]    O  40 S
+[35]    O  41 S
+[36]    E  58 S       [ Should jump here ]
+[37]    O  54 S       [ Show that test failed
+[38]    T  31 S       [ Clear the accumulator ]
+[39]    E  55 S       [ Jump to print cr/lf ]
+[40]    P     S       [ Figure 0 ]
+[41]    Q     S       [ Figure 1 ]
+[42]    W     S       [ Figure 2 ]
+[43]    E     S       [ Figure 3 ]
+[44]    R     S       [ Figure 4 ]
+[45]    T     S       [ Figure 5 ]
+[46]    Y     S       [ Figure 6 ]
+[47]    U     S       [ Figure 7 ]
+[48]    I     S       [ Figure 8 ]
+[49]    O     S       [ Figure 9 ]
+[50]    #     S       [ Figure Shift ]
+[51]    @     S       [ Carriage return ]
+[52]    &     S       [ Line Feed ]
+[53]    Z     S       [ Plus sign ]
+[54]    A     S       [ Minus sign ]
+[55]    O  51 S       [ Print carriage return ]
+[56]    O  52 S       [ Print line feed ]
+[57]    E  61 S       [ Jump to next test ]
+[58]    O  53 S       [ Indicate test passed ]
+[59]    T  31 S       [ Clear accumulator for jump ]
+[60]    E  55 S       [ print cr/lf ]
+
+        [ Test 102 - E for A > 0 ]
+[61]    O  41 S       [ Output test number ]
+[62]    O  40 S
+[63]    O  42 S
+[64]    A  38 S       [ Load positive number into accumulator ]
+[65]    E  71 S       [ Should jump ]
+[66]    O  54 S       [ Indicate test failed ]
+[67]    O  51 S       [ Carriage return ]
+[68]    O  52 S       [ Line feed ]
+[69]    T  31 S       [ Clear accumulator ]
+[70]    E  74 S       [ Jump to next test ]
+[71]    O  53 S       [ Indicate test passed ]
+[72]    T  31 S       [ Clear accumulator ]
+[73]    E  67 S       [ Jump to print cr/lf ]
+
+        [ Test 103 - E for A < 0 ]
+[74]    O  41 S       [ Output test number ]
+[75]    O  40 S
+[76]    O  43 S
+[77]    S  38 S       [ Load Negative number into accumulator ]
+[78]    E  84 S       [ Should not jump ]
+[79]    O  53 S       [ Indicate test succeeded ]
+[80]    O  51 S       [ Carriage return ]
+[81]    O  52 S       [ Line feed ]
+[82]    T  31 S       [ Clear accumulator ]
+[83]    E  87 S       [ Jump to next test ]
+[84]    O  54 S       [ Indicate test failed ]
+[85]    T  31 S       [ Clear accumulator ]
+[86]    E  80 S       [ Jump to print cr/lf ]
+
+        [ Test 104 - G for A = 0 ]
+[87]    O  41 S       [ Output test number ]
+[88]    O  40 S
+[89]    O  44 S
+[90]    T  31 S       [ Set accumulator to zero ]
+[91]    G  97 S       [ Should not jump ]
+[92]    O  53 S       [ Indicate test succeeded ]
+[93]    O  51 S       [ Carriage return ]
+[94]    O  52 S       [ Line feed ]
+[95]    T  31 S       [ Clear accumulator ]
+[96]    E 100 S       [ Jump to next test ]
+[97]    O  54 S       [ Indicate test failed ]
+[98]    T  31 S       [ Clear accumulator ]
+[99]    E  93 S       [ Jump to print cr/lf ]
+
+        [ Test 105 - G for A > 0 ]
+[100]   O  41 S       [ Output test number ]
+[101]   O  40 S
+[102]   O  45 S
+[103]   A  38 S       [ Set accumulator to positive number ]
+[104]   G 110 S       [ Should not jump ]
+[105]   O  53 S       [ Indicate test succeeded ]
+[106]   O  51 S       [ Carriage return ]
+[107]   O  52 S       [ Line feed ]
+[108]   T  31 S       [ Clear accumulator ]
+[109]   E 113 S       [ Jump to next test ]
+[110]   O  54 S       [ Indicate test failed ]
+[111]   T  31 S       [ Clear accumulator ]
+[112]   E 106 S       [ Jump to print cr/lf ]
+
+        [ Test 106 - G for A < 0 ]
+[113]   O  41 S       [ Output test number ]
+[114]   O  40 S
+[115]   O  46 S
+[116]   S  38 S       [ Set accumulator to negative number ]
+[117]   G 123 S       [ Should jump ]
+[118]   O  54 S       [ Indicate test failed ]
+[119]   O  51 S       [ Carriage return ]
+[120]   O  52 S       [ Line feed ]
+[121]   T  31 S       [ Clear accumulator ]
+[122]   E 126 S       [ Jump to next test ]
+[123]   O  53 S       [ Indicate test succeeded ]
+[124]   T  31 S       [ Clear accumulator ]
+[125]   E 119 S       [ Jump to print cr/lf ]
+
+[126]   Z     S
+
+To have group 100 go no to another group on the tape, replace lines:
+
+[31]    T 140 S       [ Set last position ]
+
+[126]   A 136 S       [ Get fix for Initial Orders 1]
+[127]   T  25 S
+[128]   A 137 S
+[129]   U   0 S
+[130]   T   2 S
+[131]   A 138 S
+[132]   T   1 S
+[133]   A 139 S
+[134]   T   3 S
+[135]   E     S
+
+[136]   T  31 S
+[137]   T     S
+[138]   H   2 S
+[139]   E   6 S
+
+
+
+
+[ Diagnostic group 200 ]
+[31]    T 302 S       [ Set last position ]
+[32]    O  50 S       [ Set teleprinter into figure mode ]
+
+[33]    E  61 S       [ Jump to first test ]
+[34]    P   5 S       [ Data 5 ]
+[35]    P   6 S       [ Data 6 ]
+[36]    P     L       [ Data 1 ]
+[37]    P  11 S       [ Data 11 ] 
+[38]    *     S       [ Data             01111 ]
+[39]    V     S       [ Data             11111 ]
+[40]    P     S       [ Figure 0         00000 ]
+[41]    Q     S       [ Figure 1         00001 ]
+[42]    W     S       [ Figure 2         00010 ]
+[43]    E     S       [ Figure 3         00011 ]
+[44]    R     S       [ Figure 4         00100 ]
+[45]    T     S       [ Figure 5         00101 ]
+[46]    Y     S       [ Figure 6         00110 ]
+[47]    U     S       [ Figure 7         00111 ]
+[48]    I     S       [ Figure 8         01000 ]
+[49]    O     S       [ Figure 9         01001 ]
+[50]    #     S       [ Figure Shift     01011 ]
+[51]    @     S       [ Carriage return  10010 ]
+[52]    &     S       [ Line Feed        11000 ]
+[53]    Z     S       [ Plus sign        01101 ]
+[54]    A     S       [ Minus sign       11100 ]
+[55]    K     S       [ Data             01110 ]
+[56]    C     S       [ Data             11110 ]
+[57]    P   1 S       [ Data 1 ]
+[58]    V 2047S       [ Data 11111 1 1111111111 0 ]
+[59]    F     S       [ Data             10001 ]
+[60]    L     S       [ Data             11001 ]
+
+        [ Test 201 - AS 5+6=11 ]
+[61]    O  42 S       [ Output test number ]
+[62]    O  40 S
+[63]    O  41 S
+[64]    A  34 S       [ Put 5 into the accumulator ]
+[65]    A  35 S       [ Add 6 ]
+[66]    S  37 S       [ Compare to correct answer ]
+[67]    G  75 S       [ Wrong if negative ]
+[68]    S  36 S       [ 0-1 should end up negative ]
+[69]    E  75 S       [ Jump if result was not zero ]
+[70]    O  53 S       [ Indicate test succeeded ]
+[71]    O  51 S       [ Print carriage return ]
+[72]    O  52 S       [ and line feed ]
+[73]    T  31 S       [ Clear the accumulator ]
+[74]    E  78 S       [ Jump to the next test ]
+[75]    O  54 S       [ Indicate test failed ]
+[76]    T  31 S       [ Clear the accumulator ]
+[77]    E  71 S       [ Jump to print cr/lf ]
+
+        [ Test 202 - AS 01111 + 11111 = 01110 ]
+[78]    O  42 S       [ Output test number ]
+[79]    O  40 S
+[80]    O  42 S
+[81]    A  38 S       [ Put 01111 into the accumulator ]
+[82]    A  39 S       [ Add 11111 ]
+[83]    S  55 S       [ Compare to correct answer ]
+[84]    G  92 S       [ Wrong if negative ]
+[85]    S  36 S       [ 0-1 should end up negative ]
+[86]    E  92 S       [ Jump if result was not zero ]
+[87]    O  53 S       [ Indicate test succeeded ]
+[88]    O  51 S       [ Print carriage return ]
+[89]    O  52 S       [ and line feed ]
+[90]    T  31 S       [ Clear the accumulator ]
+[91]    E  95 S       [ Jump to the next test ]
+[92]    O  54 S       [ Indicate test failed ]
+[93]    T  31 S       [ Clear the accumulator ]
+[94]    E  88 S       [ Jump to print cr/lf ]
+
+        [ Test 203 - AS 01111 + 01111 = 11110 ]
+[95]    O  42 S       [ Output test number ]
+[96]    O  40 S
+[97]    O  43 S
+[98]    A  38 S       [ Put 01111 into the accumulator ]
+[99]    A  38 S       [ Add 01111 ]
+[100]   S  56 S       [ Compare to correct answer ]
+[101]   G 109 S       [ Wrong if negative ]
+[102]   S  36 S       [ 0-1 should end up negative ]
+[103]   E 109 S       [ Jump if result was not zero ]
+[104]   O  53 S       [ Indicate test succeeded ]
+[105]   O  51 S       [ Print carriage return ]
+[106]   O  52 S       [ and line feed ]
+[107]   T  31 S       [ Clear the accumulator ]
+[108]   E 112 S       [ Jump to the next test ]
+[109]   O  54 S       [ Indicate test failed ]
+[110]   T  31 S       [ Clear the accumulator ]
+[111]   E 105 S       [ Jump to print cr/lf ]
+
+        [ Test 204 - AS 11110 + 11110 = 11100 ]
+[112]   O  42 S       [ Output test number ]
+[113]   O  40 S
+[114]   O  44 S
+[115]   A  56 S       [ Put 11110 into the accumulator ]
+[116]   A  56 S       [ Add 11110 ]
+[117]   S  54 S       [ Compare to correct answer ]
+[118]   G 126 S       [ Wrong if negative ]
+[119]   S  36 S       [ 0-1 should end up negative ]
+[120]   E 126 S       [ Jump if result was not zero ]
+[121]   O  53 S       [ Indicate test succeeded ]
+[122]   O  51 S       [ Print carriage return ]
+[123]   O  52 S       [ and line feed ]
+[124]   T  31 S       [ Clear the accumulator ]
+[125]   E 129 S       [ Jump to the next test ]
+[126]   O  54 S       [ Indicate test failed ]
+[127]   T  31 S       [ Clear the accumulator ]
+[128]   E 122 S       [ Jump to print cr/lf ]
+
+        [ Test 205 - AS 00111 + 01111 = 10110 ]
+[129]   O  42 S       [ Output test number ]
+[130]   O  40 S
+[131]   O  45 S
+[132]   A  47 S       [ Put 00111 into the accumulator ]
+[133]   A  38 S       [ Add 01111 ]
+[134]   S 146 S       [ Compare to correct answer ]
+[135]   G 143 S       [ Wrong if negative ]
+[136]   S  36 S       [ 0-1 should end up negative ]
+[137]   E 143 S       [ Jump if result was not zero ]
+[138]   O  53 S       [ Indicate test succeeded ]
+[139]   O  51 S       [ Print carriage return ]
+[140]   O  52 S       [ and line feed ]
+[141]   T  31 S       [ Clear the accumulator ]
+[142]   E 147 S       [ Jump to the next test ]
+[143]   O  54 S       [ Indicate test failed ]
+[144]   T  31 S       [ Clear the accumulator ]
+[145]   E 139 S       [ Jump to print cr/lf ]
+[146]   N     S       [ Data  10110 ]
+
+        [ Test 206 - AS 11111 + 00001 = 00000 ]
+[147]   O  42 S       [ Output test number ]
+[148]   O  40 S
+[149]   O  46 S
+[150]   A  39 S       [ Put 11111 into the accumulator ]
+[151]   A  41 S       [ Add 00001 ]
+[152]   S  40 S       [ Compare to correct answer ]
+[153]   G 161 S       [ Wrong if negative ]
+[154]   S  36 S       [ 0-1 should end up negative ]
+[155]   E 161 S       [ Jump if result was not zero ]
+[156]   O  53 S       [ Indicate test succeeded ]
+[157]   O  51 S       [ Print carriage return ]
+[158]   O  52 S       [ and line feed ]
+[159]   T  31 S       [ Clear the accumulator ]
+[160]   E 165 S       [ Jump to the next test ]
+[161]   O  54 S       [ Indicate test failed ]
+[162]   T  31 S       [ Clear the accumulator ]
+[163]   E 157 S       [ Jump to print cr/lf ]
+
+[164]   .     S       [ Data 10000 ]
+
+        [ Test 225 - AS 6-5=1 ]
+[165]   O  42 S       [ Output test number ]
+[166]   O  42 S
+[167]   O  45 S
+[168]   A  35 S       [ Put 6 into the accumulator ]
+[169]   S  34 S       [ Subtract 5 ]
+[170]   S  57 S       [ Compare to correct answer ]
+[171]   G 179 S       [ Wrong if negative ]
+[172]   S  36 S       [ 0-1 should end up negative ]
+[173]   E 179 S       [ Jump if result was not zero ]
+[174]   O  53 S       [ Indicate test succeeded ]
+[175]   O  51 S       [ Print carriage return ]
+[176]   O  52 S       [ and line feed ]
+[177]   T  31 S       [ Clear the accumulator ]
+[178]   E 182 S       [ Jump to the next test ]
+[179]   O  54 S       [ Indicate test failed ]
+[180]   T  31 S       [ Clear the accumulator ]
+[181]   E 175 S       [ Jump to print cr/lf ]
+
+        [ Test 226 - AS 5-6=-1 ]
+[182]   O  42 S       [ Output test number ]
+[183]   O  42 S
+[184]   O  46 S
+[185]   A  34 S       [ Put 5 into the accumulator ]
+[186]   S  35 S       [ Subtract 6 ]
+[187]   S  58 S       [ Compare to correct answer ]
+[188]   G 196 S       [ Wrong if negative ]
+[189]   S  36 S       [ 0-1 should end up negative ]
+[190]   E 196 S       [ Jump if result was not zero ]
+[191]   O  53 S       [ Indicate test succeeded ]
+[192]   O  51 S       [ Print carriage return ]
+[193]   O  52 S       [ and line feed ]
+[194]   T  31 S       [ Clear the accumulator ]
+[195]   E 199 S       [ Jump to the next test ]
+[196]   O  54 S       [ Indicate test failed ]
+[197]   T  31 S       [ Clear the accumulator ]
+[198]   E 192 S       [ Jump to print cr/lf ]
+
+        [ Test 227 - AS 01110-01111 = 11111 ]
+[199]   O  42 S       [ Output test number ]
+[200]   O  42 S
+[201]   O  47 S
+[202]   A  55 S       [ Put 01110 into the accumulator ]
+[203]   S  38 S       [ Subtract 01111 ]
+[204]   S  39 S       [ Compare to correct answer ]
+[205]   G 213 S       [ Wrong if negative ]
+[206]   S  36 S       [ 0-1 should end up negative ]
+[207]   E 213 S       [ Jump if result was not zero ]
+[208]   O  53 S       [ Indicate test succeeded ]
+[209]   O  51 S       [ Print carriage return ]
+[210]   O  52 S       [ and line feed ]
+[211]   T  31 S       [ Clear the accumulator ]
+[212]   E 216 S       [ Jump to the next test ]
+[213]   O  54 S       [ Indicate test failed ]
+[214]   T  31 S       [ Clear the accumulator ]
+[215]   E 209 S       [ Jump to print cr/lf ]
+
+        [ Test 228 - AS 11111-01111 = 10000 ]
+[216]   O  42 S       [ Output test number ]
+[217]   O  42 S
+[218]   O  48 S
+[219]   A  39 S       [ Put 11111 into the accumulator ]
+[220]   S  38 S       [ Subtract 01111 ]
+[221]   S 164 S       [ Compare to correct answer ]
+[222]   G 230 S       [ Wrong if negative ]
+[223]   S  36 S       [ 0-1 should end up negative ]
+[224]   E 230 S       [ Jump if result was not zero ]
+[225]   O  53 S       [ Indicate test succeeded ]
+[226]   O  51 S       [ Print carriage return ]
+[227]   O  52 S       [ and line feed ]
+[228]   T  31 S       [ Clear the accumulator ]
+[229]   E 233 S       [ Jump to the next test ]
+[230]   O  54 S       [ Indicate test failed ]
+[231]   T  31 S       [ Clear the accumulator ]
+[232]   E 226 S       [ Jump to print cr/lf ]
+
+        [ Test 229 - AS 01111-11111 = 10000 ]
+[233]   O  42 S       [ Output test number ]
+[234]   O  42 S
+[235]   O  49 S
+[236]   A  38 S       [ Put 01111 into the accumulator ]
+[237]   S  39 S       [ Subtract 11111 ]
+[238]   S 164 S       [ Compare to correct answer ]
+[239]   G 247 S       [ Wrong if negative ]
+[240]   S  36 S       [ 0-1 should end up negative ]
+[241]   E 247 S       [ Jump if result was not zero ]
+[242]   O  53 S       [ Indicate test succeeded ]
+[243]   O  51 S       [ Print carriage return ]
+[244]   O  52 S       [ and line feed ]
+[245]   T  31 S       [ Clear the accumulator ]
+[246]   E 250 S       [ Jump to the next test ]
+[247]   O  54 S       [ Indicate test failed ]
+[248]   T  31 S       [ Clear the accumulator ]
+[249]   E 243 S       [ Jump to print cr/lf ]
+
+        [ Test 230 - AS 11110-01111 = 01111 ]
+[250]   O  42 S       [ Output test number ]
+[251]   O  43 S
+[252]   O  40 S
+[253]   A  56 S       [ Put 11110 into the accumulator ]
+[254]   S  38 S       [ Subtract 01111 ]
+[255]   S  38 S       [ Compare to correct answer ]
+[256]   G 264 S       [ Wrong if negative ]
+[257]   S  36 S       [ 0-1 should end up negative ]
+[258]   E 264 S       [ Jump if result was not zero ]
+[259]   O  53 S       [ Indicate test succeeded ]
+[260]   O  51 S       [ Print carriage return ]
+[261]   O  52 S       [ and line feed ]
+[262]   T  31 S       [ Clear the accumulator ]
+[263]   E 267 S       [ Jump to the next test ]
+[264]   O  54 S       [ Indicate test failed ]
+[265]   T  31 S       [ Clear the accumulator ]
+[266]   E 260 S       [ Jump to print cr/lf ]
+
+        [ Test 231 - AS 01111-11110 = 10001 ]
+[267]   O  42 S       [ Output test number ]
+[268]   O  43 S
+[269]   O  41 S
+[270]   A  38 S       [ Put 01111 into the accumulator ]
+[271]   S  56 S       [ Subtract 11110 ]
+[272]   S  59 S       [ Compare to correct answer ]
+[273]   G 281 S       [ Wrong if negative ]
+[274]   S  36 S       [ 0-1 should end up negative ]
+[275]   E 281 S       [ Jump if result was not zero ]
+[276]   O  53 S       [ Indicate test succeeded ]
+[277]   O  51 S       [ Print carriage return ]
+[278]   O  52 S       [ and line feed ]
+[279]   T  31 S       [ Clear the accumulator ]
+[280]   E 284 S       [ Jump to the next test ]
+[281]   O  54 S       [ Indicate test failed ]
+[282]   T  31 S       [ Clear the accumulator ]
+[283]   E 277 S       [ Jump to print cr/lf ]
+
+        [ Test 232 - AS 11110-11111 = 11111 ]
+[284]   O  42 S       [ Output test number ]
+[285]   O  43 S
+[286]   O  42 S
+[287]   A  56 S       [ Put 11110 into the accumulator ]
+[288]   S  39 S       [ Subtract 11111 ]
+[289]   S  39 S       [ Compare to correct answer ]
+[290]   G 298 S       [ Wrong if negative ]
+[291]   S  36 S       [ 0-1 should end up negative ]
+[292]   E 298 S       [ Jump if result was not zero ]
+[293]   O  53 S       [ Indicate test succeeded ]
+[294]   O  51 S       [ Print carriage return ]
+[295]   O  52 S       [ and line feed ]
+[296]   T  31 S       [ Clear the accumulator ]
+[297]   E 301 S       [ Jump to the next test ]
+[298]   O  54 S       [ Indicate test failed ]
+[299]   T  31 S       [ Clear the accumulator ]
+[300]   E 294 S       [ Jump to print cr/lf ]
+
+        Z     S
+
+
+
+[ Diagnostic group 300 ]
+[31]    T 157 S       [ Set last position ]
+[32]    O  50 S       [ Set teleprinter into figure mode ]
+[33]    E  61 S       [ Jump to first test ]
+[34]    P     S       [ Storage for test ]
+[35]    P     S       [ Storage for test ]
+[36]    P     L       [ Data 1 ]
+[37]    P  11 S       [ Data 11 ] 
+[38]    *     S       [ Data             01111 ]
+[39]    V     S       [ Data             11111 ]
+[40]    P     S       [ Figure 0         00000 ]
+[41]    Q     S       [ Figure 1         00001 ]
+[42]    W     S       [ Figure 2         00010 ]
+[43]    E     S       [ Figure 3         00011 ]
+[44]    R     S       [ Figure 4         00100 ]
+[45]    T     S       [ Figure 5         00101 ]
+[46]    Y     S       [ Figure 6         00110 ]
+[47]    U     S       [ Figure 7         00111 ]
+[48]    I     S       [ Figure 8         01000 ]
+[49]    O     S       [ Figure 9         01001 ]
+[50]    #     S       [ Figure Shift     01011 ]
+[51]    @     S       [ Carriage return  10010 ]
+[52]    &     S       [ Line Feed        11000 ]
+[53]    Z     S       [ Plus sign        01101 ]
+[54]    A     S       [ Minus sign       11100 ]
+[55]    K     S       [ Data             01110 ]
+[56]    C     S       [ Data             11110 ]
+[57]    P   1 S       [ Data 1 ]
+[58]    V 2047S       [ Data 11111 1 1111111111 0 ]
+[59]    F     S       [ Data             10001 ]
+[60]    L     S       [ Data             11001 ]
+
+        [ Test 301 - TS Store and test A cleared ]
+[61]    O  43 S       [ Output test number ]
+[62]    O  40 S
+[63]    O  41 S
+[64]    A  45 S       [ Load 00101 into the acc ]
+[65]    T  35 S       [ Store into test address ]
+[66]    G  80 S       [ Jump if A has a negative number, A should be cleare ]
+[67]    S  36 S       [ Subtracting one should be negative, if zero ]
+[68]    E  80 S       [ Jump if A did not have zero ]
+[69]    A  36 S       [ Put back to zero ]
+[70]    A  35 S       [ Get stored value ]
+[71]    S  45 S       [ Check to see if it is correct ]
+[72]    G  80 S       [ If negative, wrong number ]
+[73]    S  36 S       [ Subtracting 1 should make it negative ]
+[74]    E  80 S       [ Jump if not ]
+[75]    O  53 S       [ Indicate test succeeded ]
+[76]    O  51 S       [ Output a carriage return ]
+[77]    O  52 S       [ and line feed ]
+[78]    T  34 S       [ Clear the accumulator ]
+[79]    E  83 S       [ Jump to next test ]
+[80]    O  54 S       [ Indicate test failed ]
+[81]    T  34 S       [ Clear accumulator for jump ]
+[82]    E  76 S       [ Jump to output cr/lf ]
+
+
+        [ Test 302 - TS Store and test AB cleared ]
+[83]    O  43 S       [ Output test number ]
+[84]    O  40 S
+[85]    O  42 S
+[86]    T  31 S       [ clear the accumulator ]
+[87]    A  44 L       [ Load both A and B ]
+[88]    T  31 S       [ Clear the accumulator ]
+[89]    T  34 L       [ Save both A and B ]
+[90]    A  34 S       [ get first number ]
+[91]    G 104 S       [ If negative, then failed ]
+[92]    S  36 S       [ Subtracting one should be negative ]
+[93]    E 104 S       [ Failure if not ]
+[94]    T  31 S       [ Clear the accumulator ]
+[95]    A  35 S       [ Get second number ]
+[96]    G 104 S       [ If negative, then failed ]
+[97]    S  36 S       [ Subtracting one should make it negative ]
+[98]    E 104 S       [ If not, then failed ]
+[99]    O  53 S       [ Indicate test succeeded ]
+[100]   O  51 S       [ Output a carriage return ]
+[101]   O  52 S       [ and line feed ]
+[102]   T  34 S       [ Clear the accumulator ]
+[103]   E 107 S       [ Jump to next test ]
+[104]   O  54 S       [ Indicate test failed ]
+[105]   T  34 S       [ Clear accumulator for jump ]
+[106]   E 100 S       [ Jump to output cr/lf ]
+
+        [ Test 311 - TS Store and test A untouched ]
+[107]   O  43 S       [ Output test number ]
+[108]   O  41 S
+[109]   O  41 S
+[110]   A  45 S       [ Load 00101 into the acc ]
+[111]   U  35 S       [ Store into test address ]
+[112]   S  45 S       [ Compare to original number ]
+[113]   G 127 S       [ Jump if A has a negative number, A should be cleare ]
+[114]   S  36 S       [ Subtracting one should be negative, if zero ]
+[115]   E 127 S       [ Jump if A did not have zero ]
+[116]   A  36 S       [ Put back to zero ]
+[117]   A  35 S       [ Get stored value ]
+[118]   S  45 S       [ Check to see if it is correct ]
+[119]   G 127 S       [ If negative, wrong number ]
+[120]   S  36 S       [ Subtracting 1 should make it negative ]
+[121]   E 127 S       [ Jump if not ]
+[122]   O  53 S       [ Indicate test succeeded ]
+[123]   O  51 S       [ Output a carriage return ]
+[124]   O  52 S       [ and line feed ]
+[125]   T  34 S       [ Clear the accumulator ]
+[126]   E 130 S       [ Jump to next test ]
+[127]   O  54 S       [ Indicate test failed ]
+[128]   T  34 S       [ Clear accumulator for jump ]
+[129]   E 123 S       [ Jump to output cr/lf ]
+
+        [ Test 312 - TS Store and test AB untouched ]]
+[130]   O  43 S       [ Output test number ]
+[131]   O  41 S
+[132]   O  42 S
+[133]   T  31 S       [ clear the accumulator ]
+[134]   A  44 L       [ Load both A and B ]
+[135]   U  31 S       [ Store into test address ]
+[136]   T  34 L       [ Save both A and B ]
+[137]   A  34 S       [ get first number ]
+[138]   S  44 S       [ Compare against test number ]
+[139]   G 153 S       [ If negative, then failed ]
+[140]   S  36 S       [ Subtracting one should be negative ]
+[141]   E 153 S       [ Failure if not ]
+[142]   T  31 S       [ Clear the accumulator ]
+[143]   A  35 S       [ Get second number ]
+[144]   S  45 S       [ Compare against test number ]
+[145]   G 153 S       [ If negative, then failed ]
+[146]   S  36 S       [ Subtracting one should make it negative ]
+[147]   E 153 S       [ If not, then failed ]
+[148]   O  53 S       [ Indicate test succeeded ]
+[149]   O  51 S       [ Output a carriage return ]
+[150]   O  52 S       [ and line feed ]
+[151]   T  34 S       [ Clear the accumulator ]
+[152]   E 156 S       [ Jump to next test ]
+[153]   O  54 S       [ Indicate test failed ]
+[154]   T  34 S       [ Clear accumulator for jump ]
+[155]   E 149 S       [ Jump to output cr/lf ]
+
+        Z     S
+
+
+
+401 - R 01010 >> 1
+402 - R 11010 >> 1
+403 - R 01010 >> 8  = 00000 0 0001010000 0
+404 - R 11010 >> 8  = 11111 1 1111010000 0
+405 - R 01010 >> 16 = 00000 0 0000000000 0 10100
+406 - R 11010 >> 16 = 11111 1 1111111111 1 10100
+421 - L 01010 << 1  = 10100
+422 - L 11010 << 1  = 10100
+423 - L 00000 0 0001010000 0 << 8 = 01010
+424 - L 11111 1 1111010000 0 << 8 = 11010
+425 - L 00000 0 0000000000 0 10100 << 18 = 01010
+426 - L 11111 1 1111111111 1 10100 << 18 = 11010
+
+[ Diagnostic group 400 ]
+[31]    T 315 S       [ Set last position ]
+[32]    O  50 S       [ Set teleprinter into figure mode ]
+[33]    E  61 S       [ Jump to first test ]
+[34]    P     S       [ Storage for test ]
+[35]    P     S       [ Storage for test ]
+[36]    P     L       [ Data 1 ]
+[37]    J     S       [ Data             01010 ] 
+[38]    X     S       [ Data             11010 ]
+[39]    B     S       [ Data             11101 ]
+[40]    P     S       [ Figure 0         00000 ]
+[41]    Q     S       [ Figure 1         00001 ]
+[42]    W     S       [ Figure 2         00010 ]
+[43]    E     S       [ Figure 3         00011 ]
+[44]    R     S       [ Figure 4         00100 ]
+[45]    T     S       [ Figure 5         00101 ]
+[46]    Y     S       [ Figure 6         00110 ]
+[47]    U     S       [ Figure 7         00111 ]
+[48]    I     S       [ Figure 8         01000 ]
+[49]    O     S       [ Figure 9         01001 ]
+[50]    #     S       [ Figure Shift     01011 ]
+[51]    @     S       [ Carriage return  10010 ]
+[52]    &     S       [ Line Feed        11000 ]
+[53]    Z     S       [ Plus sign        01101 ]
+[54]    A     S       [ Minus sign       11100 ]
+[55]    P  80 S       [ Data  00000 0 0001010000 0 ]
+[56]    V 2000S       [ Data  11111 1 1111010000 0 ]
+[57]    !     S       [ Data             10100 ]
+[58]    V 2047L       [ Data  11111 1 1111111111 1 ]
+[59]    P     S       [ Data  00000 0 0000000000 0 ]
+[60]    J     S       [ Data ]
+
+        [ Test 401 - R 01010 >> 1 ]
+[61]    O  44 S       [ Output test number ]
+[62]    O  40 S
+[63]    O  41 S
+[64]    T  31 S       [ clear the accumulator ]
+[65]    A  37 S       [ Load 01010 into the accumulator ]
+[66]    R     L       [ Shift right one position ]
+[67]    S  45 S       [ Check against correct answer ]
+[68]    G  76 S       [ If negative ,then not correct ]
+[69]    S  36 S       [ Subtracting one should make it negative ]
+[70]    E  76 S       [ If still positive ,then not correct ]
+[71]    O  53 S       [ Indicate successful test ]
+[72]    O  51 S       [ Print a carriage return ]
+[73]    O  52 S       [ and line feed ]
+[74]    T  31 S       [ Clear the accumulator ]
+[75]    E  79 S       [ Jump to next test]
+[76]    O  54 S       [ Indicate failed test ]
+[77]    T  31 S       [ Clear the accumulator ]
+[78]    E  72 S       [ Jump to print cr/lf ]
+
+        [ Test 402 - R 11010 >> 1 ]
+[79]    O  44 S       [ Output test number ]
+[80]    O  40 S
+[81]    O  42 S
+[82]    T  31 S       [ clear the accumulator ]
+[83]    A  38 S       [ Load 11010 into the accumulator ]
+[84]    R     L       [ Shift right one position ]
+[85]    S  39 S       [ Check against correct answer ]
+[86]    G  94 S       [ If negative ,then not correct ]
+[87]    S  36 S       [ Subtracting one should make it negative ]
+[88]    E  94 S       [ If still positive ,then not correct ]
+[89]    O  53 S       [ Indicate successful test ]
+[90]    O  51 S       [ Print a carriage return ]
+[91]    O  52 S       [ and line feed ]
+[92]    T  31 S       [ Clear the accumulator ]
+[93]    E  97 S       [ Jump to next test]
+[94]    O  54 S       [ Indicate failed test ]
+[95]    T  31 S       [ Clear the accumulator ]
+[96]    E  90 S       [ Jump to print cr/lf ]
+
+        [ Test 403 - R 01010 >> 8 ]
+[97]    O  44 S       [ Output test number ]
+[98]    O  40 S
+[99]    O  43 S
+[100]   T  31 S       [ clear the accumulator ]
+[101]   A  37 S       [ Load 01010 into the accumulator ]
+[102]   R  64 S       [ Shift right 8 positions ]
+[103]   S  55 S       [ Check against correct answer ]
+[104]   G 112 S       [ If negative ,then not correct ]
+[105]   S  36 S       [ Subtracting one should make it negative ]
+[106]   E 112 S       [ If still positive ,then not correct ]
+[107]   O  53 S       [ Indicate successful test ]
+[108]   O  51 S       [ Print a carriage return ]
+[109]   O  52 S       [ and line feed ]
+[110]   T  31 S       [ Clear the accumulator ]
+[111]   E 115 S       [ Jump to next test]
+[112]   O  54 S       [ Indicate failed test ]
+[113]   T  31 S       [ Clear the accumulator ]
+[114]   E 108 S       [ Jump to print cr/lf ]
+
+        [ Test 404 - R 11010 >> 8 ]
+[115]   O  44 S       [ Output test number ]
+[116]   O  40 S
+[117]   O  44 S
+[118]   T  31 S       [ clear the accumulator ]
+[119]   A  38 S       [ Load 11010 into the accumulator ]
+[120]   R  64 S       [ Shift right 8 positions ]
+[121]   S  56 S       [ Check against correct answer ]
+[122]   G 130 S       [ If negative ,then not correct ]
+[123]   S  36 S       [ Subtracting one should make it negative ]
+[124]   E 130 S       [ If still positive ,then not correct ]
+[125]   O  53 S       [ Indicate successful test ]
+[126]   O  51 S       [ Print a carriage return ]
+[127]   O  52 S       [ and line feed ]
+[128]   T  31 S       [ Clear the accumulator ]
+[129]   E 133 S       [ Jump to next test]
+[130]   O  54 S       [ Indicate failed test ]
+[131]   T  31 S       [ Clear the accumulator ]
+[132]   E 126 S       [ Jump to print cr/lf ]
+
+        [ Test 405 - R 01010 >> 16 = 00000 0 0000000000 0 10100 ]
+[133]   O  44 S       [ Output test number ]
+[134]   O  40 S
+[135]   O  45 S
+[136]   T  31 S       [ clear the accumulator ]
+[137]   A  37 S       [ Load 01010 into the accumulator ]
+[138]   R  64 S       [ Shift right 8 positions ]
+[139]   R  64 S       [ Shift for a total of 16 positions ]
+[140]   T  34 L       [ Store the result to be checked ]
+[141]   A  34 S       [ Retrieve the low portion ]
+[142]   S  48 S       [ Check against correct answer ]
+[143]   G 156 S       [ If negative ,then not correct ]
+[144]   S  36 S       [ Subtracting one should make it negative ]
+[145]   E 156 S       [ If still positive ,then not correct ]
+[146]   T  31 S       [ Clear the accumulator ]
+[147]   A  35 S       [ And load the upper portion ]
+[148]   G 156 S       [ Jump if there is a negative number there ]
+[149]   S  36 S       [ Subtract 1 should make the zero negative ]
+[150]   E 156 S       [ Jump if it was not zero ]
+[151]   O  53 S       [ Indicate successful test ]
+[152]   O  51 S       [ Print a carriage return ]
+[153]   O  52 S       [ and line feed ]
+[154]   T  31 S       [ Clear the accumulator ]
+[155]   E 159 S       [ Jump to next test]
+[156]   O  54 S       [ Indicate failed test ]
+[157]   T  31 S       [ Clear the accumulator ]
+[158]   E 152 S       [ Jump to print cr/lf ]
+
+        [ Test 406 - R 11010 >> 16 = 11111 1 1111111111 1 10100 ]
+[159]   O  44 S       [ Output test number ]
+[160]   O  40 S
+[161]   O  46 S
+[162]   T  31 S       [ clear the accumulator ]
+[163]   A  38 S       [ Load 11010 into the accumulator ]
+[164]   R  64 S       [ Shift right 8 positions ]
+[165]   R  64 S       [ Shift for a total of 16 positions ]
+[166]   T  34 L       [ Store the result to be checked ]
+[167]   A  34 S       [ Retrieve the low portion ]
+[168]   S  48 S       [ Check against correct answer ]
+[169]   G 183 S       [ If negative ,then not correct ]
+[170]   S  36 S       [ Subtracting one should make it negative ]
+[171]   E 183 S       [ If still positive ,then not correct ]
+[172]   T  31 S       [ Clear the accumulator ]
+[173]   A  35 S       [ And load the upper portion ]
+[174]   S  58 S       [ Check against expected number ]
+[175]   G 183 S       [ Jump if there is a negative number there ]
+[176]   S  36 S       [ Subtract 1 should make the zero negative ]
+[177]   E 183 S       [ Jump if it was not zero ]
+[178]   O  53 S       [ Indicate successful test ]
+[179]   O  51 S       [ Print a carriage return ]
+[180]   O  52 S       [ and line feed ]
+[181]   T  31 S       [ Clear the accumulator ]
+[182]   E 186 S       [ Jump to next test]
+[183]   O  54 S       [ Indicate failed test ]
+[184]   T  31 S       [ Clear the accumulator ]
+[185]   E 179 S       [ Jump to print cr/lf ]
+
+        [ Test 421 - L 01010 << 1 ]
+[186]   O  44 S       [ Output test number ]
+[187]   O  42 S
+[188]   O  41 S
+[189]   T  31 S       [ clear the accumulator ]
+[190]   A  37 S       [ Load 01010 into the accumulator ]
+[191]   L     L       [ Shift left one position ]
+[192]   S  57 S       [ Check against correct answer ]
+[193]   G 201 S       [ If negative ,then not correct ]
+[194]   S  36 S       [ Subtracting one should make it negative ]
+[195]   E 201 S       [ If still positive ,then not correct ]
+[196]   O  53 S       [ Indicate successful test ]
+[197]   O  51 S       [ Print a carriage return ]
+[198]   O  52 S       [ and line feed ]
+[199]   T  31 S       [ Clear the accumulator ]
+[200]   E 204 S       [ Jump to next test]
+[201]   O  54 S       [ Indicate failed test ]
+[202]   T  31 S       [ Clear the accumulator ]
+[203]   E 197 S       [ Jump to print cr/lf ]
+
+        [ Test 422 - L 01010 << 1 ]
+[204]   O  44 S       [ Output test number ]
+[205]   O  42 S
+[206]   O  42 S
+[207]   T  31 S       [ clear the accumulator ]
+[208]   A  38 S       [ Load 11010 into the accumulator ]
+[209]   L     L       [ Shift left one position ]
+[210]   S  57 S       [ Check against correct answer ]
+[211]   G 219 S       [ If negative ,then not correct ]
+[212]   S  36 S       [ Subtracting one should make it negative ]
+[213]   E 219 S       [ If still positive ,then not correct ]
+[214]   O  53 S       [ Indicate successful test ]
+[215]   O  51 S       [ Print a carriage return ]
+[216]   O  52 S       [ and line feed ]
+[217]   T  31 S       [ Clear the accumulator ]
+[218]   E 222 S       [ Jump to next test]
+[219]   O  54 S       [ Indicate failed test ]
+[220]   T  31 S       [ Clear the accumulator ]
+[221]   E 215 S       [ Jump to print cr/lf ]
+
+        [ Test 423 - L 00000 0 0001010000 0 << 8 ]
+[222]   O  44 S       [ Output test number ]
+[223]   O  42 S
+[224]   O  43 S
+[225]   T  31 S       [ clear the accumulator ]
+[226]   A  55 S       [ Load 00000 0 0001010000 0 into the accumulator ]
+[227]   L  64 S       [ Shift left eight positions ]
+[228]   S  37 S       [ Check against correct answer ]
+[229]   G 237 S       [ If negative ,then not correct ]
+[230]   S  36 S       [ Subtracting one should make it negative ]
+[231]   E 237 S       [ If still positive ,then not correct ]
+[232]   O  53 S       [ Indicate successful test ]
+[233]   O  51 S       [ Print a carriage return ]
+[234]   O  52 S       [ and line feed ]
+[235]   T  31 S       [ Clear the accumulator ]
+[236]   E 240 S       [ Jump to next test]
+[237]   O  54 S       [ Indicate failed test ]
+[238]   T  31 S       [ Clear the accumulator ]
+[239]   E 233 S       [ Jump to print cr/lf ]
+
+        [ Test 424 - L 11111 1 1111010000 0 << 8 ]
+[240]   O  44 S       [ Output test number ]
+[241]   O  42 S
+[242]   O  44 S
+[243]   T  31 S       [ clear the accumulator ]
+[244]   A  56 S       [ Load 11111 1 1111010000 0 into the accumulator ]
+[245]   L  64 S       [ Shift left eight positions ]
+[246]   S  38 S       [ Check against correct answer ]
+[247]   G 255 S       [ If negative ,then not correct ]
+[248]   S  36 S       [ Subtracting one should make it negative ]
+[249]   E 255 S       [ If still positive ,then not correct ]
+[250]   O  53 S       [ Indicate successful test ]
+[251]   O  51 S       [ Print a carriage return ]
+[252]   O  52 S       [ and line feed ]
+[253]   T  31 S       [ Clear the accumulator ]
+[254]   E 260 S       [ Jump to next test]
+[255]   O  54 S       [ Indicate failed test ]
+[256]   T  31 S       [ Clear the accumulator ]
+[257]   E 251 S       [ Jump to print cr/lf ]
+
+        [ Test 425 - L 00000 0 0000000000 0 10100 << 18 = 01010 ]
+[258]   J     S       [ 01010 0 0000000000 0 ]
+[259]   P     S       [ 00000 0 0000000000 0 ]
+[260]   O  44 S       [ Output test number ]
+[261]   O  42 S
+[262]   O  45 S
+[263]   T  31 S       [ clear the accumulator ]
+[264]   A 258 L       [ Load 00000 0 0000000000 0 01010 into the accumulator ]
+[265]   L  64 S       [ Shift left 8 positions ]
+[266]   L 256 S       [ Shift for a total of 18 positions ]
+[267]   T  34 L       [ Store the result to be checked ]
+[268]   A  35 S       [ Retrieve the high portion ]
+[269]   S 258 S       [ Check against correct answer ]
+[270]   G 283 S       [ If negative ,then not correct ]
+[271]   S  36 S       [ Subtracting one should make it negative ]
+[272]   E 283 S       [ If still positive ,then not correct ]
+[273]   T  31 S       [ Clear the accumulator ]
+[274]   A  34 S       [ And load the low portion ]
+[275]   G 283 S       [ Jump if there is a negative number there ]
+[276]   S  36 S       [ Subtract 1 should make the zero negative ]
+[277]   E 283 S       [ Jump if it was not zero ]
+[278]   O  53 S       [ Indicate successful test ]
+[279]   O  51 S       [ Print a carriage return ]
+[280]   O  52 S       [ and line feed ]
+[281]   T  31 S       [ Clear the accumulator ]
+[282]   E 288 S       [ Jump to next test]
+[283]   O  54 S       [ Indicate failed test ]
+[284]   T  31 S       [ Clear the accumulator ]
+[285]   E 279 S       [ Jump to print cr/lf ]
+
+        [ Test 426 - L 11111 1 1111111111 1 11010 << 18 = 11010 ]
+[286]   X     S       [ Data  11010 0 0000000000 0 ]
+[287]   V 2047L       [ Data  11111 1 1111111111 1 ]
+[288]   O  44 S       [ Output test number ]
+[289]   O  42 S
+[290]   O  46 S
+[291]   T  31 S       [ clear the accumulator ]
+[292]   A 286 L       [ Load 11111 1 1111111111 1 11010 into the accumulator ]
+[293]   L  64 S       [ Shift left 8 positions ]
+[294]   L 256 S       [ Shift for a total of 18 positions ]
+[295]   T  34 L       [ Store the result to be checked ]
+[296]   A  35 S       [ Retrieve the high portion ]
+[297]   S 286 S       [ Check against correct answer ]
+[298]   G 311 S       [ If negative ,then not correct ]
+[299]   S  36 S       [ Subtracting one should make it negative ]
+[300]   E 311 S       [ If still positive ,then not correct ]
+[301]   T  31 S       [ Clear the accumulator ]
+[302]   A  34 S       [ And load the low portion ]
+[303]   G 311 S       [ Jump if there is a negative number there ]
+[304]   S  36 S       [ Subtract 1 should make the zero negative ]
+[305]   E 311 S       [ Jump if it was not zero ]
+[306]   O  53 S       [ Indicate successful test ]
+[307]   O  51 S       [ Print a carriage return ]
+[308]   O  52 S       [ and line feed ]
+[309]   T  31 S       [ Clear the accumulator ]
+[310]   E 314 S       [ Jump to next test]
+[311]   O  54 S       [ Indicate failed test ]
+[312]   T  31 S       [ Clear the accumulator ]
+[313]   E 307 S       [ Jump to print cr/lf ]
+
+[314]   Z     S
+
+
+501 - H S
+
+[ Diagnostic group 500 ]
+[31]    T  86 S       [ Set last position ]
+[32]    O  50 S       [ Set teleprinter into figure mode ]
+[33]    E  61 S       [ Jump to first test ]
+[34]    P     S       [ Storage for test ]
+[35]    P     S       [ Storage for test ]
+[36]    X 1025L       [ Data  11010 1 0000000001 1 ]
+[37]    P     L       [ Data  00000 0 0000000000 1 ] 
+[38]    V 2047L       [ Data  11111 1 1111111111 1 ]
+[39]    V 2047L       [ Data  11111 1 1111111111 1 ]
+[40]    P     S       [ Figure 0         00000 ]
+[41]    Q     S       [ Figure 1         00001 ]
+[42]    W     S       [ Figure 2         00010 ]
+[43]    E     S       [ Figure 3         00011 ]
+[44]    R     S       [ Figure 4         00100 ]
+[45]    T     S       [ Figure 5         00101 ]
+[46]    Y     S       [ Figure 6         00110 ]
+[47]    U     S       [ Figure 7         00111 ]
+[48]    I     S       [ Figure 8         01000 ]
+[49]    O     S       [ Figure 9         01001 ]
+[50]    #     S       [ Figure Shift     01011 ]
+[51]    @     S       [ Carriage return  10010 ]
+[52]    &     S       [ Line Feed        11000 ]
+[53]    Z     S       [ Plus sign        01101 ]
+[54]    A     S       [ Minus sign       11100 ]
+[55]    K     S       [ Data  ]
+[56]    C     S       [ Data  ]
+[57]    P   1 S       [ Data  ]
+[58]    V 2047S       [ Data  ]
+[59]    F     S       [ Data  ]
+[60]    L     S       [ Data  ]
+
+        [ Test 501 - HS ]
+[61]    O  45 S       [ Output test number ]
+[62]    O  40 S
+[63]    O  41 S
+[64]    H  40 L       [ Load both RS with nonzeros ]
+[65]    H  36 S       [ Load R with 11010 1 0000000001 1, low should be zeros ]
+[66]    C  38 L       [ AND it with all ones to get it in the accumulator ]
+[67]    T  34 L       [ Store result to test individually ]
+[68]    A  34 S       [ Retreive low word, should be zero ]
+[69]    G  83 S       [ Jump if a negative number here    ]
+[70]    S  37 S       [ Subtracting one shoule be negative if zero ]
+[71]    E  83 S       [ If still positive, then error ]
+[72]    T  31 S       [ Clear the accumulator ]
+[73]    A  35 S       [ Get high word ]
+[74]    S  36 S       [ Check against correct answer ]
+[75]    G  83 S       [ If negative then wrong ]
+[76]    S  37 S       [ Subtracting 1 should be negative if zero ]
+[77]    E  83 S       [ If still positive, then wrong ]
+[78]    O  53 S       [ Show test succeeded ]
+[79]    O  51 S       [ Output carriage return ]
+[80]    O  52 S       [ and line feed ]
+[81]    T  31 S       [ Clear accumulator for jump ]
+[82]    E  86 S       [ Jump to next test ]
+[83]    O  54 S       [ Indicate test failed ]
+[84]    T  31 S       [ Clear accumulator for jump ]
+[85]    E  79 S       [ Jump to output cr/lf ]
+
+        Z     S
+
+
+[31]    T  42 S
+[32]    E  36 S
+[33]    X 1025L       [ Data  11010 1 0000000001 1 ]
+[34]    #     S       [ Figure Shift     01011 ]
+[35]    @     S       [ Carriage return  10010 ]
+[36]    V 2047L       [ Data  11111 1 1111111111 1 ]
+[37]    V 2047L       [ Data  11111 1 1111111111 1 ]
+
+[38]    H  34 L
+[39]    H  33 S
+[40]    C  36 L
+
+        Z     S

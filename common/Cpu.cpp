@@ -310,6 +310,10 @@ UInt32 Cpu::Fetch(UInt32 addr) {
   return mem[addr];
   }
 
+Reader* Cpu::GetReader() {
+  return reader;
+  }
+
 void Cpu::InitialOrders(Int32 i) {
   initialOrders i;
   }
@@ -356,6 +360,11 @@ void Cpu::Reset() {
   }
 
 UInt32 Cpu::Scr() {
+  return scr;
+  }
+
+UInt32 Cpu::Scr(UInt32 i) {
+  scr = i;
   return scr;
   }
 
@@ -611,15 +620,25 @@ void Cpu::step() {
          break;
 
     case 13:                                     /* Z - Stop */
-         stopCommand = 'Y';
+         stopCommand = true;
          if (trace == 'Y') printf("Stopping");
          break;
 
     default:
          printf("Bad instruction\n");
-         stopCommand = 'Y';
+         stopCommand = true;
     }
   if (trace == 'Y') {
     printf("\n");
     }
   }
+
+Boolean StopCommand() {
+  return stopCommand;
+  }
+
+Boolean StopCommand(Boolean b) {
+  stopCommand = b;
+  return stopCommand;
+  }
+

@@ -20,6 +20,7 @@ class Cpu {
     Int32  initialOrders;
     Printer* printer;
     Reader*  reader;
+    Boolean  stopCommand;
     void   and();
     void   doMul(char mode);
     Byte   getShiftCount(UInt32 a);
@@ -35,21 +36,26 @@ class Cpu {
   public:
     Cpu();
     ~Cpu();
-    UInt32 *Acc();
-    void    AttachPrinter(Printer* p);
-    void    AttachReader(Reader* r);
-    String *Disassem(UInt32 address, UInt32 order);
-    UInt32  Fetch(UInt32 addr);
-    void    InitialOrders(Int32 i);
-    void    LoadOrders1();
-    void    LoadOrders2();
-    UInt32 *Memory();
-    UInt32 *Multiplicand();
-    UInt32 *Multiplier();
-    UInt32  Order;
-    void    Reset();
-    UInt32  Scr();
-    void    Step();
+    UInt32  *Acc();
+    void     AttachPrinter(Printer* p);
+    void     AttachReader(Reader* r);
+    String  *Disassem(UInt32 address, UInt32 order);
+    UInt32   Fetch(UInt32 addr);
+    Printer *GetPrinter();
+    Reader  *GetReader();
+    void     InitialOrders(Int32 i);
+    void     LoadOrders1();
+    void     LoadOrders2();
+    UInt32  *Memory();
+    UInt32  *Multiplicand();
+    UInt32  *Multiplier();
+    UInt32   Order;
+    void     Reset();
+    UInt32   Scr();
+    UInt32   Scr(UInt32 i);
+    void     Step();
+    Boolean  StopCommand();
+    Boolean  StopCommand(Boolean b);
   };
 
 #endif

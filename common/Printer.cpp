@@ -12,7 +12,7 @@ Printer::Printer() {
 Printer::~Printer() {
   }
 
-Byte Printer::translate(Byte in) {
+Byte Printer::Translate(Byte in) {
   if (!shiftMode) {
     switch (in) {
       case 0: return 'P';
@@ -87,8 +87,8 @@ Byte Printer::translate(Byte in) {
   return ' ';
   }
 
-void Print(Byte out) {
-  out = translate(out);
+void Printer::Print(Byte out) {
+  out = Translate(out);
   if (out == 200) shiftMode = false;
   else if (out == 201) shiftMode = true;
 #ifdef TEXT
@@ -126,5 +126,14 @@ void Print(Byte out) {
 #else
   else printf("%c",out);
 #endif
+  }
+
+Boolean Printer::ShiftMode() {
+  return shiftMode;
+  }
+
+Boolean Printer::ShiftMode(Boolean b) {
+  shiftMode = b;
+  return shiftMode;
   }
 

@@ -11,11 +11,13 @@ class Printer {
     Int32   printerLine;
     Int32   printerPos;
     Boolean shiftMode;
-    Byte    translate(Byte in);
   public:
     Printer();
     ~Printer();
     void Print(Byte out);
+    Boolean ShiftMode();
+    Boolean ShiftMode(Boolean b);
+    Byte    Translate(Byte in);
   };
 
 #endif

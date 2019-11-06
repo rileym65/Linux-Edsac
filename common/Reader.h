@@ -7,12 +7,12 @@ class Reader {
   protected:
     FILE*   tape;
     Boolean tapeRemark;
-    Byte translate(Byte in);
   public:
     Reader();
     ~Reader();
     Boolean Mount(char* filename);
     Byte    Read();
+    Byte    Translate(Byte in);
   };
 
 #endif

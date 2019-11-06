@@ -8,7 +8,7 @@ Reader::Reader() {
 Reader::~Reader() {
   }
 
-Byte Reader::translate(Byte in) {
+Byte Reader::Translate(Byte in) {
   if (in >= 'a' && in <= 'z') in -= 32;
   switch (in) {
     case 'P': return 0;
@@ -83,7 +83,7 @@ Byte Reader::Read() {
       if (i == '[') tapeRemark = true;
       else if (i == ']') tapeRemark = false;
       else if (!tapeRemark) {
-        i = translate(i);
+        i = Translate(i);
         if (i != 255) flag = 'Y';
         }
       } else flag = '*';

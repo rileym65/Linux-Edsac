@@ -8,21 +8,21 @@ void smHelp() {
   printf("HELP          - Show available commands\n");
   }
 
-void smTank(EDSAC_CPU* cpu,char* buffer) {
-  showTank(cpu,atoi(buffer));
+void smTank(char* buffer) {
+  debugger->showTank(atoi(buffer));
   }
 
-void smShowreg(EDSAC_CPU* cpu) {
+void smShowreg() {
   printf("Multiplier  : ");
-  showMult(cpu);
+  debugger->showMult();
   printf("Multiplicand: ");
-  showMultiplicand(cpu);
+  debugger->showMultiplicand();
   printf("Accumulator : ");
-  showAcc(cpu);
+  debugger->showAcc();
   printf("\n");
   }
 
-void stopMode(EDSAC_CPU* cpu) {
+void StopMode() {
   char flag;
   char buffer[1024];
   flag = 'N';
@@ -31,19 +31,22 @@ void stopMode(EDSAC_CPU* cpu) {
     fgets(buffer,1023,stdin);
     while (buffer[0] > 0 && buffer[strlen(buffer)-1] < ' ')
       buffer[strlen(buffer)-1] = 0;
-    if (strcasecmp(buffer,"regs") == 0) smShowreg(cpu);
-    if (strcasecmp(buffer,"run") == 0) { stopCommand = 'N'; flag = 'Y'; }
-    if (strncasecmp(buffer,"t",1) == 0) smTank(cpu,buffer+1);
+    if (strcasecmp(buffer,"regs") == 0) smShowreg();
+    if (strcasecmp(buffer,"run") == 0) {
+      cpu->StopCommand(false);
+      flag = 'Y';
+      }
+    if (strncasecmp(buffer,"t",1) == 0) smTank(buffer+1);
     if (strcasecmp(buffer,"quit") == 0) { stopSim = 'Y'; flag = 'Y'; }
     if (strcasecmp(buffer,"help") == 0) smHelp();
     if (buffer[0] == '0') {
-      cpu->acc[0] = 10 << 1;
-      stopCommand = 'N';
+      cpu->Acc()[0] = 10 << 1;
+      cpu->StopCommand(false);
       flag = 'Y';
       }
     if (buffer[0] >= '1' && buffer[0] <= '9') {
-      cpu->acc[0] = (buffer[0] - '0') << 1;
-      stopCommand = 'N';
+      cpu->Acc()[0] = (buffer[0] - '0') << 1;
+      cpu->StopCommand(false);
       flag = 'Y';
       }
     }

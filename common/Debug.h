@@ -5,24 +5,22 @@
 
 class Debug {
   protected:
+    char   debugMode;
     UInt32 breakpoints[1024];
     Cpu*   cpu;
     UInt32 numBreakpoints;
     UInt64 traps;
     Boolean atBreakpoint();
-    void    Debug::bp(char* buffer);
+    void    bp(char* buffer);
     void    clear();
     void    disassemble(char* buffer);
     void    dump(char* buffer);
     void    help();
     void    rembp(char* buffer);
     void    reset();
-    void    showAcc()
+    Boolean run(char* buffer);
     void    showbp();
-    void    showMult()
-    void    showMultiplicand();
     void    showreg();
-    void    showTank(UInt32 tank);
     void    showtraps();
     void    showWord(UInt32 wrd);
     void    step();
@@ -34,6 +32,13 @@ class Debug {
   public:
     Debug(Cpu* c);
     ~Debug();
+    void Debugger();
+    char    DebugMode();
+    char    DebugMode(char c);
+    void    showAcc();
+    void    showMult();
+    void    showMultiplicand();
+    void    showTank(UInt32 tank);
   };
 
 #endif

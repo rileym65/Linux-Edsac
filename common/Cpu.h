@@ -21,7 +21,8 @@ class Cpu {
     Printer* printer;
     Reader*  reader;
     Boolean  stopCommand;
-    void   and();
+    char     trace;
+    void   doAnd();
     void   doMul(char mode);
     Byte   getShiftCount(UInt32 a);
     void   lMul(UInt32 address,char mode);
@@ -49,13 +50,15 @@ class Cpu {
     UInt32  *Memory();
     UInt32  *Multiplicand();
     UInt32  *Multiplier();
-    UInt32   Order;
+    UInt32   Order();
     void     Reset();
     UInt32   Scr();
     UInt32   Scr(UInt32 i);
     void     Step();
     Boolean  StopCommand();
     Boolean  StopCommand(Boolean b);
+    char     Trace();
+    char     Trace(char c);
   };
 
 #endif

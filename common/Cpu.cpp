@@ -1,3 +1,4 @@
+#include <string.h>
 #include "Cpu.h"
 
 UInt32 orders1[] = {
@@ -83,6 +84,7 @@ UInt32 orders2[] = {
 Cpu::Cpu() {
   printer = NULL;
   reader = NULL;
+  trace = 'N';
   Reset();
   }
 
@@ -93,7 +95,7 @@ Cpu::~Cpu() {
 /* ***** Protected functions ***** */
 /* ******************************* */
 
-void Cpu::and() {
+void Cpu::doAnd() {
   UInt32 tmp[2];
   tmp[0] = multiplier[0] & multiplicand[0];
   tmp[1] = multiplier[1] & multiplicand[1];
@@ -169,7 +171,7 @@ void Cpu::mbAdd(UInt32* value,Int32 words) {
   acc[0] &= 0x1ffff;
   }
 
-void mbSub(UInt32* value,Int32 words) {
+void Cpu::mbSub(UInt32* value,Int32 words) {
   UInt32 tmp[8];
   Int32  i;
   for (i=0; i<words; i++) tmp[i] = value[i];
@@ -314,8 +316,12 @@ Reader* Cpu::GetReader() {
   return reader;
   }
 
+Printer* Cpu::GetPrinter() {
+  return printer;
+  }
+
 void Cpu::InitialOrders(Int32 i) {
-  initialOrders i;
+  initialOrders = i;
   }
 
 void Cpu::LoadOrders1() {
@@ -327,7 +333,7 @@ void Cpu::LoadOrders1() {
     }
   }
 
-void Cpu::LoadOrders1() {
+void Cpu::LoadOrders2() {
   UInt32 i;
   i = 0;
   while (orders2[i] != 0xfffff) {
@@ -368,15 +374,15 @@ UInt32 Cpu::Scr(UInt32 i) {
   return scr;
   }
 
-void Cpu::step() {
+void Cpu::Step() {
   Int32  i;
   UInt32 c;
   Byte   b;
   UInt32 address;
   UInt32 tmp[2];
-  order = fetch(scr);
+  order = Fetch(scr);
   if (trace == 'Y') {
-    disassem(cpu,scr,order);
+    Disassem(scr, order);
     }
   scr++;
   address = (order >> 1) & 0x3ff;
@@ -389,16 +395,16 @@ void Cpu::step() {
                     mem[address+1],mem[address]);
            tmp[0] = mem[address+1];
            tmp[1] = mem[address];
-           mbAdd(cpu,tmp,2);
+           mbAdd(tmp,2);
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
          else  {
            if (trace == 'Y') printf("%x+%x",acc[0],mem[address]);
-           mbAdd(cpu,&mem[address],1);
+           mbAdd(&mem[address],1);
            if (trace == 'Y') printf("=%x",acc[0]);
            }
 #ifdef TEXT
-         showAcc(cpu);
+         showAcc();
 #endif
          break;
 
@@ -410,16 +416,16 @@ void Cpu::step() {
                     mem[address+1],mem[address]);
            tmp[0] = mem[address+1];
            tmp[1] = mem[address];
-           mbSub(cpu,tmp,2);
+           mbSub(tmp,2);
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
          else {
            if (trace == 'Y') printf("%x-%x",acc[0],mem[address]);
-           mbSub(cpu,&mem[address],1);
+           mbSub(&mem[address],1);
            if (trace == 'Y') printf("=%x",acc[0]);
            }
 #ifdef TEXT
-         showAcc(cpu);
+         showAcc();
 #endif
          break;
 
@@ -437,7 +443,7 @@ void Cpu::step() {
            if (trace == 'Y') printf("R = %05x",multiplier[0]);
            }
 #ifdef TEXT
-         showMult(cpu);
+         showMult();
 #endif
          break;
 
@@ -446,37 +452,37 @@ void Cpu::step() {
            if (trace == 'Y')
              printf("%05x %05x * %05x %05x = ",multiplier[0],
                     multiplier[1],mem[address+1],mem[address]);
-           lMul(cpu,address,'A');
+           lMul(address,'A');
            if (trace == 'Y')
              printf("%05x %05x %05x%05x",acc[0],acc[1],acc[2],
                     acc[3]);
            } else {
            if (trace == 'Y') printf("%05x * %05x = ",multiplier[0],mem[address]);
-           sMul(cpu,mem[address],'A');
+           sMul(mem[address],'A');
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
 #ifdef TEXT
-         showMult(cpu);
-         showMultiplicand(cpu);
-         showAcc(cpu);
+         showMult();
+         showMultiplicand();
+         showAcc();
 #endif
          break;
 
     case 22:                                     /* N - Multiply */
          if (order & 1) {
            if (trace == 'Y') printf("%05x %05x * %05x %05x = ",multiplier[0],multiplier[1],mem[address+1],mem[address]);
-           lMul(cpu,address,'S');
+           lMul(address,'S');
            if (trace == 'Y') printf("%05x %05x %05x%05x",acc[0],acc[1],acc[2],acc[3]);
            }
          else {
            if (trace == 'Y') printf("%05x * %05x = ",multiplier[0],mem[address]);
-           sMul(cpu,mem[address],'S');
+           sMul(mem[address],'S');
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
 #ifdef TEXT
-         showMult(cpu);
-         showMultiplicand(cpu);
-         showAcc(cpu);
+         showMult();
+         showMultiplicand();
+         showAcc();
 #endif
          break;
 
@@ -486,21 +492,21 @@ void Cpu::step() {
            mem[address] = acc[1];
            mem[address+1] = acc[0];
 #ifdef TEXT
-           showMemory(cpu, address);
-           showMemory(cpu, address+1);
+           showMemory(address);
+           showMemory(address+1);
 #endif
            if (trace == 'Y') printf("[%d]=%5x [%d]=%5x",address+1,acc[0],address,acc[1]);
            }
          else {
            mem[address] = acc[0];
 #ifdef TEXT
-           showMemory(cpu, address);
+           showMemory(address);
 #endif
            if (trace == 'Y') printf("[%d]=%x",address,acc[0]);
            }
          for (i=0; i<4; i++) acc[i] = 0;
 #ifdef TEXT
-         showAcc(cpu);
+         showAcc();
 #endif
          break;
 
@@ -511,15 +517,15 @@ void Cpu::step() {
            mem[address+1] = acc[0];
            if (trace == 'Y') printf("[%d]=%5x [%d]=%5x",address+1,acc[0],address,acc[1]);
 #ifdef TEXT
-           showMemory(cpu, address);
-           showMemory(cpu, address+1);
+           showMemory(address);
+           showMemory(address+1);
 #endif
            }
          else {
            if (trace == 'Y') printf("[%d]=%x",address,acc[0]);
            mem[address] = acc[0];
 #ifdef TEXT
-           showMemory(cpu, address);
+           showMemory(address);
 #endif
            }
          break;
@@ -528,13 +534,13 @@ void Cpu::step() {
          if (order & 1) {
            multiplicand[0] = mem[address+1];
            multiplicand[1] = mem[address];
-           and(cpu);
+           doAnd();
            }
          else {
            multiplicand[0] = mem[address];
            multiplicand[1] = 0;
            if (trace == 'Y') printf("%05x + (%05x & %05x) =",acc[0],multiplier[0],multiplicand[0]);
-           and(cpu);
+           doAnd();
            if (trace == 'Y') printf(" %05x",acc[0]);
            }
 #ifdef TEXT
@@ -613,9 +619,9 @@ void Cpu::step() {
          break;
 
     case  6:                                     /* Y - Extend ABC */
-         roundAcc(cpu);
+         roundAcc();
 #ifdef TEXT
-         showAcc(cpu);
+         showAcc();
 #endif
          break;
 
@@ -633,12 +639,21 @@ void Cpu::step() {
     }
   }
 
-Boolean StopCommand() {
+Boolean Cpu::StopCommand() {
   return stopCommand;
   }
 
-Boolean StopCommand(Boolean b) {
+Boolean Cpu::StopCommand(Boolean b) {
   stopCommand = b;
   return stopCommand;
+  }
+
+char Cpu::Trace() {
+  return trace;
+  }
+
+char Cpu::Trace(char c) {
+  trace = c;
+  return trace;
   }
 

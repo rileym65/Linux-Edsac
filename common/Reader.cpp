@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "Reader.h"
 
 Reader::Reader() {

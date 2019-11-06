@@ -1,7 +1,12 @@
+#include <stdio.h>
+#include <string.h>
 #include "Debug.h"
 
 Debug::Debug(Cpu* c) {
   cpu = c;
+  debugMode = 'N';
+  numBreakpoints = 0;
+  traps = 0;
   }
 
 Debug::~Debug() {
@@ -11,7 +16,7 @@ Boolean Debug::atBreakpoint() {
   UInt32 i;
   for (i=0; i<numBreakpoints; i++)
     if (cpu->Scr() == breakpoints[i]) return true;
-  return trapSet(cpu);
+  return trapSet();
   }
 
 void Debug::bp(char* buffer) {
@@ -33,6 +38,15 @@ void Debug::clear() {
   for (i=0; i<1024; i++) mem[i] = 0;
   }
 
+char Debug::DebugMode() {
+  return debugMode;
+  }
+
+char Debug::DebugMode(char c) {
+  debugMode = c;
+  return debugMode;
+  }
+
 void Debug::disassemble(char* buffer) {
   Int32   i;
   UInt32  addr;
@@ -51,7 +65,7 @@ void Debug::dump(char* buffer) {
   addr = (strlen(buffer) > 0) ? atoi(buffer) : cpu->Scr();
   for (i=0; i<16; i++) {
     printf("[%3d] ",addr+i);
-    showWord(cpu->()Memory()[addr+i]);
+    showWord(cpu->Memory()[addr+i]);
     printf("\n");
     }
   }
@@ -100,7 +114,7 @@ void Debug::reset() {
   UInt32 *acc;
   acc = cpu->Acc();
   for (i=0; i<4; i++) acc[i] = 0;
-  Cpu->Scr(0);
+  cpu->Scr(0);
   }
 
 Boolean Debug::run(char* buffer) {
@@ -110,7 +124,7 @@ Boolean Debug::run(char* buffer) {
       debugMode = 'N';
       return false;
       }
-    while (atBreakpoint(cpu) != 'Y' && !cpu->StopCommand()) cpu->Step();
+    while (atBreakpoint() != 'Y' && !cpu->StopCommand()) cpu->Step();
     } else {
     addr = atoi(buffer);
     while (cpu->Scr() != addr && !cpu->StopCommand()) step();
@@ -141,7 +155,7 @@ void Debug::showAcc() {
   printf("\n");
   }
 
-void Debug::showbp(EDSAC_CPU* cpu) {
+void Debug::showbp() {
   UInt32 i;
   for (i=0; i<numBreakpoints; i++) printf("[%3d]\n",breakpoints[i]);
   }
@@ -257,7 +271,6 @@ void Debug::showWord(UInt32 wrd) {
 
 void Debug::step() {
   cpu->Step();
-  cycles++;
   }
 
 void Debug::tank(char* buffer) {
@@ -292,7 +305,7 @@ void Debug::untrap(char* buffer) {
   traps &= ~(1 << cmd);
   }
 
-void Debug::Debug() {
+void Debug::Debugger() {
   char buffer[1024];
   char flag;
   UInt32 order;
@@ -308,28 +321,27 @@ void Debug::Debug() {
       buffer[strlen(buffer)-1] = 0;
     if (strlen(buffer) == 0) cpu->Step();
     if (strcasecmp(buffer,"help") == 0) help();
-    if (strcasecmp(buffer,"orders 1") == 0) loadOrders1(cpu);
-    if (strcasecmp(buffer,"orders 2") == 0) loadOrders2(cpu);
-    if (strcasecmp(buffer,"reset") == 0) reset(cpu);
-    if (strcasecmp(buffer,"clear") == 0) clear(cpu);
+    if (strcasecmp(buffer,"orders 1") == 0) cpu->LoadOrders1();
+    if (strcasecmp(buffer,"orders 2") == 0) cpu->LoadOrders2();
+    if (strcasecmp(buffer,"reset") == 0) reset();
+    if (strcasecmp(buffer,"clear") == 0) clear();
     if (strcasecmp(buffer,"step") == 0) cpu->Step();
-    if (strncasecmp(buffer,"bp ",3) == 0) bp(cpu,buffer+3);
-    if (strncasecmp(buffer,"dis",3) == 0) dis(cpu,buffer+3);
-    if (strncasecmp(buffer,"dump",4) == 0) dump(cpu,buffer+4);
-    if (strncasecmp(buffer,"run",3) == 0) flag = run(cpu,buffer+3);
-    if (strncasecmp(buffer,"rembp ",6) == 0) rembp(cpu,buffer+6);
-    if (strncasecmp(buffer,"tank ",5) == 0) tank(cpu,buffer+5);
-    if (strncasecmp(buffer,"trap ",5) == 0) trap(cpu,buffer+5);
-    if (strncasecmp(buffer,"tape ",5) == 0) tape(cpu,buffer+5);
-    if (strncasecmp(buffer,"untrap ",7) == 0) untrap(cpu,buffer+7);
-    if (strcasecmp(buffer,"showbp") == 0) showbp(cpu);
-    if (strcasecmp(buffer,"showreg") == 0) showreg(cpu);
-    if (strcasecmp(buffer,"showtraps") == 0) showtraps(cpu);
-    if (strcasecmp(buffer,"trace on") == 0) trace = 'Y';
-    if (strcasecmp(buffer,"trace off") == 0) trace = 'N';
+    if (strncasecmp(buffer,"bp ",3) == 0) bp(buffer+3);
+    if (strncasecmp(buffer,"dis",3) == 0) disassemble(buffer+3);
+    if (strncasecmp(buffer,"dump",4) == 0) dump(buffer+4);
+    if (strncasecmp(buffer,"run",3) == 0) flag = run(buffer+3);
+    if (strncasecmp(buffer,"rembp ",6) == 0) rembp(buffer+6);
+    if (strncasecmp(buffer,"tank ",5) == 0) tank(buffer+5);
+    if (strncasecmp(buffer,"trap ",5) == 0) trap(buffer+5);
+    if (strncasecmp(buffer,"tape ",5) == 0) tape(buffer+5);
+    if (strncasecmp(buffer,"untrap ",7) == 0) untrap(buffer+7);
+    if (strcasecmp(buffer,"showbp") == 0) showbp();
+    if (strcasecmp(buffer,"showreg") == 0) showreg();
+    if (strcasecmp(buffer,"showtraps") == 0) showtraps();
+    if (strcasecmp(buffer,"trace on") == 0) cpu->Trace('Y');
+    if (strcasecmp(buffer,"trace off") == 0) cpu->Trace('N');
     if (strcasecmp(buffer,"quit") == 0) {
       flag = 'N';
-      stopSim = 'Y';
       }
     }
   }

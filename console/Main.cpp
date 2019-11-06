@@ -1,24 +1,27 @@
 #define MAIN
 
 #include "header.h"
+#include "Cpu.h"
+#include "Reader.h"
+#include "Printer.h"
+#include "Debug.h"
 
 int main(int argc,char** argv) {
   byte i;
   char tapeFilename[1024];
-  EDSAC_CPU cpu;
-  tapeRemark = 'N';
-  debugMode = 'N';
-  trace = 'N';
-  numBreakpoints = 0;
+  cpu = new Cpu();
+  reader = new Reader();
+  printer = new Printer();
+  cpu->AttachReader(reader);
+  cpu->AttachPrinter(printer);
+  debugger = new Debug(cpu);
   initialOrders = 2;
-  tape = NULL;
-  traps = 0;
   strcpy(tapeFilename,"");
   for (i=1; i<argc; i++) {
-    if (strcmp(argv[i],"-d") == 0) debugMode = 'Y';
+    if (strcmp(argv[i],"-d") == 0) debugger->DebugMode('Y');
     if (strcmp(argv[i],"-1") == 0) initialOrders = 1;
     if (strcmp(argv[i],"-2") == 0) initialOrders = 2;
-    if (strcmp(argv[i],"-t") == 0) trace = 'Y';
+    if (strcmp(argv[i],"-t") == 0) cpu->Trace('Y');
     if (argv[i][0] != '-') {
       strcpy(tapeFilename,argv[i]);
       if (tapeFilename[strlen(tapeFilename)-1] == '1') initialOrders = 1;
@@ -26,29 +29,27 @@ int main(int argc,char** argv) {
       }
     }
   printf("Initial Orders: %d\n",initialOrders);
-  if (debugMode == 'Y') trace = 'Y';
+  if (debugger->DebugMode() == 'Y') cpu->Trace('Y');
   if (strlen(tapeFilename) > 0) {
-    tape = fopen(tapeFilename,"r");
-    if (tape == NULL) {
+    if (!reader->Mount(tapeFilename)) {
       printf("Could not open tape file: %s\n",tapeFilename);
       exit(1);
       }
     }
-  reset(&cpu);
-  if (initialOrders == 1) loadOrders1(&cpu);
-    else loadOrders2(&cpu);
+  cpu->Reset();
+  if (initialOrders == 1) cpu->LoadOrders1();
+    else cpu->LoadOrders2();
   i = 0;
   cycles = 0;
-  stopCommand = 'N';
+  cpu->StopCommand(false);
   stopSim = 'N';
-  if (debugMode == 'Y') debug(&cpu);
+  if (debugger->DebugMode() == 'Y') debugger->Debugger();
   while (stopSim != 'Y') {
-    if (stopCommand != 'Y') {
-      step(&cpu);
+    if (!cpu->StopCommand()) {
+      cpu->Step();
       cycles++;
-/*      if (cycles > 1000000) stopCommand = 'Y';  */
       }
-    else stopMode(&cpu);
+    else StopMode();
     }
   return 0;
   }

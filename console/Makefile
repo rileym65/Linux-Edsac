@@ -1,52 +1,42 @@
 PROJECT = edsac
-CC = gcc
-LINK = gcc
-DEFS =
+CC = g++
+LINK = g++
+DEFS = -pthread
 LIBDIR =
-LIBS =
-INCDIR = -I.
+LIBS = -lSmrFramework
+INCDIR = -I. -I../common/
 INCS =
 OBJS = \
-	../common/cpu.o \
-	../common/debug.o \
-	../common/disassem.o \
-	main.o \
-	printer.o \
-	../common/reader.o \
-	showacc.o \
-	showmult.o \
-	showmultiplicand.o \
-	showtank.o \
-	stopmode.o
+	../common/Cpu.o \
+	../common/Debug.o \
+	Main.o \
+	../common/Printer.o \
+	../common/Reader.o \
+	Stopmode.o
 
 $(PROJECT) : $(OBJS)
 	$(LINK) $(DEFS) $(LIBDIR) $(OBJS) $(LIBS) -o $(PROJECT)
 
-.c.o:
+.cpp.o:
 	$(CC) $(DEFS) $(INCDIR) $(INCS) -c $<
 
-../common/cpu.o: header.h ../common/cpu.c
-	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/cpu.c -o ../common/cpu.o
+../common/Cpu.o: header.h ../common/Cpu.cpp
+	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/Cpu.cpp -o ../common/Cpu.o
 
-../common/debug.o: header.h ../common/debug.c
-	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/debug.c -o ../common/debug.o
+../common/Debug.o: header.h ../common/Debug.cpp
+	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/Debug.cpp -o ../common/Debug.o
 
-../common/disassem.o: header.h ../common/disassem.c
-	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/disassem.c -o ../common/disassem.o
+../common/Reader.o: header.h ../common/Reader.cpp
+	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/Reader.cpp -o ../common/Reader.o
 
-../common/reader.o: header.h ../common/reader.c
-	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/reader.c -o ../common/reader.o
+../common/Printer.o: header.h ../common/Printer.cpp
+	$(CC) $(DEFS) $(INCDIR) $(INCS) -c ../common/Printer.cpp -o ../common/Printer.o
 
 clean:
 	-rm $(PROJECT)
 	-rm *.o
 	-rm ../common/*.o
 
-main.o:                header.h main.c
-printer.o:             header.h printer.c
-showacc.o:             header.h showacc.c
-showmult.o:            header.h showmult.c
-showmultiplicand.o:    header.h showmultiplicand.c
-showtank.o:            header.h showtank.c
-stopmode.o:            header.h stopmode.c
+Main.o:                header.h Main.cpp
+Stopmode.o:            header.h Stopmode.cpp
 

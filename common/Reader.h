@@ -2,6 +2,9 @@
 #define _READER_H
 
 #include <stdio.h>
+#include <SmrFramework.h>
+
+using namespace SmrFramework;
 
 class Reader {
   protected:

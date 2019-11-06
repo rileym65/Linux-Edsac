@@ -58,6 +58,7 @@ Byte Reader::translate(Byte in) {
   }
 
 Boolean Reader::Mount(char* filename) {
+  if (tape != NULL) fclose(tape);
   tape = fopen(filename, "r");
   if (tape == NULL) return false;
   return true;

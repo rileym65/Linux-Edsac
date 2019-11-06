@@ -5,6 +5,9 @@
 
 using namespace SmrFramework;
 
+#include "Printer.h"
+#include "Reader.h"
+
 class Cpu {
   protected:
     UInt32 order;
@@ -15,6 +18,8 @@ class Cpu {
     UInt32 acc[4];
     Byte   lastOutput;
     Int32  initialOrders;
+    Printer* printer;
+    Reader*  reader;
     void   and();
     void   doMul(char mode);
     Byte   getShiftCount(UInt32 a);
@@ -31,6 +36,8 @@ class Cpu {
     Cpu();
     ~Cpu();
     UInt32 *Acc();
+    void    AttachPrinter(Printer* p);
+    void    AttachReader(Reader* r);
     String *Disassem(UInt32 address, UInt32 order);
     UInt32  Fetch(UInt32 addr);
     void    InitialOrders(Int32 i);

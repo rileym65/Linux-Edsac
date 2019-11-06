@@ -81,6 +81,8 @@ UInt32 orders2[] = {
   };
 
 Cpu::Cpu() {
+  printer = NULL;
+  reader = NULL;
   Reset();
   }
 
@@ -243,6 +245,14 @@ void Cpu::twosComp(UInt32* number,UInt32 num) {
 
 UInt32* Cpu::Acc() {
   return acc;
+  }
+
+void Cpu::AttachPrinter(Printer* p) {
+  printer = p;
+  }
+
+void Cpu::AttachReader(Reader* r) {
+  reader = r;
   }
 
 String* Cpu::Disassem(UInt32 address, UInt32 order) {
@@ -569,7 +579,8 @@ void Cpu::step() {
          break;
 
     case  8:                                     /* I - Input */
-         b = readTape();
+         if (reader != NULL) b = reader->Read();
+           else b = 0xff;
          if (b != 255) {
            if (order & 1) address &= 0x1fffe;
            if (trace == 'Y') printf("[%d]=%x",address+(order & 1),b);
@@ -580,7 +591,7 @@ void Cpu::step() {
 
     case  9:                                     /* O - Output */
          b = (mem[address] >> 12) & 0x1ff;
-         print(b);
+         if (printer != NULL) printer->Print(b);
          lastOutput = b;
          break;
 

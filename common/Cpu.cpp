@@ -229,7 +229,7 @@ void Cpu::sMul(UInt32 a,char mode) {
 /* ***** All others are 18 bits                        ***** */
 /* ********************************************************* */
 void Cpu::twosComp(UInt32* number,UInt32 num) {
-  UInt32 i;
+  Int32 i;
   for (i=0; i<num; i++) number[i] = (~number[i] & 0x3ffff);
   number[num-1]++;
   for (i=num-2; i>= 0; i--) {
@@ -327,8 +327,11 @@ void Cpu::InitialOrders(Int32 i) {
 void Cpu::LoadOrders1() {
   UInt32 i;
   i = 0;
+  initialOrders = 1;
+printf("Loading orders 1\n"); fflush(stdout);
   while (orders1[i] != 0xfffff) {
     mem[i] = orders1[i];
+printf("[%d] = %08x\n",i,mem[i]);
     i++;
     }
   }
@@ -336,6 +339,7 @@ void Cpu::LoadOrders1() {
 void Cpu::LoadOrders2() {
   UInt32 i;
   i = 0;
+  initialOrders = 2;
   while (orders2[i] != 0xfffff) {
     mem[i] = orders2[i];
     i++;
@@ -380,9 +384,13 @@ void Cpu::Step() {
   Byte   b;
   UInt32 address;
   UInt32 tmp[2];
+  String *line;
   order = Fetch(scr);
   if (trace == 'Y') {
-    Disassem(scr, order);
+    line = Disassem(scr, order);
+    printf("%s\n",line->AsCharArray());
+fflush(stdout);
+    delete(line);
     }
   scr++;
   address = (order >> 1) & 0x3ff;

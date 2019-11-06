@@ -213,7 +213,7 @@ void Debug::showreg() {
 void Debug::showTank(UInt32 tank) {
   UInt32  mem;
   UInt32 *memory;
-  UInt32  i;
+  Int32  i;
   char    side;
   UInt32  mask;
   UInt32  value;

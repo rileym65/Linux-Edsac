@@ -14,6 +14,7 @@ class Cpu {
     UInt32 multiplicand[2];
     UInt32 acc[4];
     Byte   lastOutput;
+    Int32  initialOrders;
     void   and();
     void   doMul(char mode);
     Byte   getShiftCount(UInt32 a);
@@ -30,7 +31,9 @@ class Cpu {
     Cpu();
     ~Cpu();
     UInt32 *Acc();
+    String *Disassem(UInt32 address, UInt32 order);
     UInt32  Fetch(UInt32 addr);
+    void    InitialOrders(Int32 i);
     void    LoadOrders1();
     void    LoadOrders2();
     UInt32 *Memory();

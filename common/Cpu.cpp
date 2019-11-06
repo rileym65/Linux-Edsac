@@ -245,9 +245,63 @@ UInt32* Cpu::Acc() {
   return acc;
   }
 
+String* Cpu::Disassem(UInt32 address, UInt32 order) {
+  char buffer[256];
+  char temp[64];
+  sprintf(buffer,"[%3d] ",address);
+  switch ((order >> 12) & 0x1ff) {
+    case  0: sprintf(temp,"P"); break;
+    case  1: sprintf(temp,"Q"); break;
+    case  2: sprintf(temp,"W"); break;
+    case  3: sprintf(temp,"E"); break;
+    case  4: sprintf(temp,"R"); break;
+    case  5: sprintf(temp,"T"); break;
+    case  6: sprintf(temp,"Y"); break;
+    case  7: sprintf(temp,"U"); break;
+    case  8: sprintf(temp,"I"); break;
+    case  9: sprintf(temp,"O"); break;
+    case 10: sprintf(temp,"J"); break;
+    case 11: sprintf(temp,"#"); break;
+    case 12: sprintf(temp,"S"); break;
+    case 13: sprintf(temp,"Z"); break;
+    case 14: sprintf(temp,"K"); break;
+    case 15: sprintf(temp,"*"); break;
+    case 16: sprintf(temp,"."); break;
+    case 17: sprintf(temp,"F"); break;
+    case 18: sprintf(temp,"@"); break;
+    case 19: sprintf(temp,"D"); break;
+    case 20: sprintf(temp,"!"); break;
+    case 21: sprintf(temp,"H"); break;
+    case 22: sprintf(temp,"N"); break;
+    case 23: sprintf(temp,"M"); break;
+    case 24: sprintf(temp,"&"); break;
+    case 25: sprintf(temp,"L"); break;
+    case 26: sprintf(temp,"X"); break;
+    case 27: sprintf(temp,"G"); break;
+    case 28: sprintf(temp,"A"); break;
+    case 29: sprintf(temp,"B"); break;
+    case 30: sprintf(temp,"C"); break;
+    case 31: sprintf(temp,"V"); break;
+    default: sprintf(temp,"-");
+    }
+  strcat(buffer, temp);
+  if (((order >> 1) & 0x7ff) > 0) sprintf(temp,"%5d",(order >> 1) & 0x7ff);
+    else sprintf(temp,"     ");
+  strcat(buffer, temp);
+  if (initialOrders == 1) { if (order & 1) sprintf(temp," L"); else sprintf(temp," S"); }
+  if (initialOrders == 2) { if (order & 1) sprintf(temp," D"); else sprintf(temp," F"); }
+  strcat(buffer, temp);
+  strcat(buffer,"     ");
+  return new String(buffer);
+  }
+
 UInt32 Cpu::Fetch(UInt32 addr) {
   if (addr > 1023) return 0xffffffff;
   return mem[addr];
+  }
+
+void Cpu::InitialOrders(Int32 i) {
+  initialOrders i;
   }
 
 void Cpu::LoadOrders1() {

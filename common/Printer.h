@@ -15,6 +15,7 @@ class Printer {
     Printer();
     ~Printer();
     void Print(Byte out);
+    void Print(const char* message);
     Boolean ShiftMode();
     Boolean ShiftMode(Boolean b);
     Byte    Translate(Byte in);

@@ -139,3 +139,7 @@ Boolean Printer::ShiftMode(Boolean b) {
   return shiftMode;
   }
 
+void Printer::Print(const char* message) {
+  printf("%s",message);
+  }
+

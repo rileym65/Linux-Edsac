@@ -86,6 +86,7 @@ Cpu::Cpu() {
   reader = NULL;
   trace = 'N';
   changes = 0;
+  only1949 = false;
   Reset();
   }
 
@@ -344,10 +345,8 @@ void Cpu::LoadOrders1() {
   UInt32 i;
   i = 0;
   initialOrders = 1;
-printf("Loading orders 1\n"); fflush(stdout);
   while (orders1[i] != 0xfffff) {
     mem[i] = orders1[i];
-printf("[%d] = %08x\n",i,mem[i]);
     i++;
     }
   }
@@ -405,7 +404,6 @@ void Cpu::Step() {
   if (trace == 'Y') {
     line = Disassem(scr, order);
     printf("%s\n",line->AsCharArray());
-fflush(stdout);
     delete(line);
     }
   scr++;
@@ -578,6 +576,12 @@ fflush(stdout);
          if ((acc[0] & 0x10000) == 0) {
            if (trace == 'Y') printf("Positive, jumping --> %d",address);
            scr = address;
+           if (order & 1 && !only1949) {
+             acc[0] = 0;
+             acc[1] = 0;
+             acc[2] = 0;
+             acc[3] = 0;
+             }
            }
          else if (trace == 'Y') printf("Negative, No jump");
          break;
@@ -586,6 +590,12 @@ fflush(stdout);
          if ((acc[0] & 0x10000) != 0) {
            if (trace == 'Y') printf("Negative, jumping --> %d",address);
            scr = address;
+           if (order & 1 && !only1949) {
+             acc[0] = 0;
+             acc[1] = 0;
+             acc[2] = 0;
+             acc[3] = 0;
+             }
            }
          else if (trace == 'Y') printf("Positive, No jump");
          break;
@@ -613,11 +623,6 @@ fflush(stdout);
          lastOutput = b;
          break;
 
-    case 17:                                     /* F - Verify */
-         mem[address] = lastOutput << 12;
-         if (trace == 'Y') printf("[%d]=%x",address,lastOutput << 12);
-         break;
-
     case 26:                                     /* X - Nop */
          break;
 
@@ -629,6 +634,51 @@ fflush(stdout);
     case 13:                                     /* Z - Stop */
          stopCommand = true;
          if (trace == 'Y') printf("Stopping");
+         break;
+
+    case 23:                                     /* M - Mix */
+         if (!only1949) {
+           acc[0] &= 0xfff;
+           if (order & 1) {
+             address &= 0x1fffe;
+             if (trace == 'Y')
+               printf("%05x %05x + %05x %05x =",acc[0],acc[1],
+                      mem[address+1],mem[address]);
+             tmp[0] = mem[address+1];
+             tmp[1] = mem[address];
+             mbAdd(tmp,2);
+             if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
+             }
+           else  {
+             if (trace == 'Y') printf("%x+%x",acc[0],mem[address]);
+             mbAdd(&mem[address],1);
+             if (trace == 'Y') printf("=%x",acc[0]);
+             }
+           changes |= CH_ACC;
+           }
+         else {
+           printf("Bad instruction\n");
+           stopCommand = true;
+           }
+         break;
+
+    case 17:                                     /* F - Unconditional jump */
+         if (!only1949) {
+           if (order & 1) {
+             if (acc[0] | acc[1] | acc[2] | acc[3] != 0) {
+               if (trace == 'Y') printf("Jumping --> %d",address);
+               scr = address;
+               }
+             }
+           else {
+             if (trace == 'Y') printf("Jumping --> %d",address);
+             scr = address;
+             }
+           }
+         else {
+           printf("Bad instruction\n");
+           stopCommand = true;
+           }
          break;
 
     default:

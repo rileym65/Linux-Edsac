@@ -30,6 +30,7 @@ class Cpu {
     Printer* printer;
     Reader*  reader;
     Boolean  stopCommand;
+    Boolean  only1949;
     char     trace;
     void   doAnd();
     void   doMul(char mode);

@@ -42,3 +42,4 @@ LINK Int32 currentTank;
 
 
 extern void StopMode();
+extern void showTank(int tank);

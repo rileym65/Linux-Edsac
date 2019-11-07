@@ -53,6 +53,15 @@ XS      No Operation
 YS      Add 1 to bit position 35 of ABC, counting the sign bit as bit zero
 ZS      Stop machine and ring bell
 
+Additional commands added after original set:
+MnS     Clear high 6 bits and then add location n to A
+MnL     Clear high 6 bits and then add location n to AB
+FnS     Absolute jump to n
+FnL     Jump if A != 0
+EnL     If a >= 0 clear the accumulator and jump to n
+GnL     if a < 0 clear the accumulator and jump to n
+YnL     If overflow in A has occured since last YL goto n
+
 Shift values:
 
     0 L    - 1
@@ -89,13 +98,17 @@ Initial Orders 1 setup
 
 Initial Orders 2 codes
 
-        T  m K              Set load point to m
+        E  m K P F          Transfers control to location m
+        E    Z P F          Transfers control to location @
+        E  m Z P F          Transfers control to loation @+m
         G    K              Set the @ parameter to current load point
-        T    Z              Restore the @ parameter
-        E  m K P F          Enter program at location m
-        E    Z P F          Enter program at location @
-        P    Z              ???
-        P    K              ???
+        G  m K              Set the @ parameter to current load point + m
+        T  m K              Set load point to m
+        T    Z              Set load point to @
+        T  m Z              Set load point to @+m
+        P    Z              Reset transfer order, used after blank tape
+        P    K              Reset transfer order, used after blank tape
+        Z    K P F          Stop until reset is pressed
 
 To set offset addresses in Initial Orders 2:
 

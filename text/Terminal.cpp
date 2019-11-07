@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <termios.h>
-#include "terminal.h"
+#include "Terminal.h"
 
 typedef struct {
   char* escape_sequence;

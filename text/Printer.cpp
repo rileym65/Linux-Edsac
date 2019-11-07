@@ -1,8 +1,22 @@
-#include "header.h"
-#include "terminal.h"
+#include <stdio.h>
+#include <string.h>
+#include "Printer.h"
+#include "Terminal.h"
 
-byte translateOutput(byte in) {
-  if (shiftMode == 0) {
+Printer::Printer() {
+  UInt32 i;
+  for (i=0; i<16; i++)
+    strcpy(printer[i],"                                        ");
+  printerPos = 0;
+  printerLine = 0;
+  shiftMode = false;
+  }
+
+Printer::~Printer() {
+  }
+
+Byte Printer::Translate(Byte in) {
+  if (!shiftMode) {
     switch (in) {
       case 0: return 'P';
       case 1: return 'Q';
@@ -76,41 +90,50 @@ byte translateOutput(byte in) {
   return ' ';
   }
 
-void print(byte out) {
-  int i;
-  out = translateOutput(out);
-  if (out == 200) shiftMode = 0;
-    else if (out == 201) shiftMode = 1;
-    else {
-      if (out == 13) {
-        if (printerLine < 15) {
-          printerLine++;
-          }
-        else {
-          for (i=0; i<15; i++) {
-            strcpy(printer[i], printer[i+1]);
-            GotoXY(40, i);
-            printf("%s",printer[i]);
-            }
-          strcpy(printer[15], "                                        ");
-          GotoXY(40, 15);
-          printf("%s",printer[15]);
-          }
-        printerPos = 0;
-        fflush(stdout);
-        }
-      else if (out == 10) {
-        printerPos = 0;
+void Printer::Print(Byte out) {
+  UInt32 i;
+  out = Translate(out);
+  if (out == 200) shiftMode = false;
+  else if (out == 201) shiftMode = true;
+  else {
+    if (out == 13) {
+      if (printerLine < 15) {
+        printerLine++;
         }
       else {
-        if (printerPos < 40) {
-          printer[printerLine][printerPos] = out;
-          printerPos++;
-          GotoXY(40, printerLine+1);
-          printf("%s",printer[printerLine]);
-          fflush(stdout);
+        for (i=0; i<15; i++) {
+          strcpy(printer[i], printer[i+1]);
+          GotoXY(40, i);
+          printf("%s",printer[i]);
           }
+        strcpy(printer[15], "                                        ");
+        GotoXY(40, 15);
+        printf("%s",printer[15]);
+        }
+      printerPos = 0;
+      fflush(stdout);
+      }
+    else if (out == 10) {
+      printerPos = 0;
+      }
+    else {
+      if (printerPos < 40) {
+        printer[printerLine][printerPos] = out;
+        printerPos++;
+        GotoXY(40, printerLine+1);
+        printf("%s",printer[printerLine]);
+        fflush(stdout);
         }
       }
+    }
+  }
+
+Boolean Printer::ShiftMode() {
+  return shiftMode;
+  }
+
+Boolean Printer::ShiftMode(Boolean b) {
+  shiftMode = b;
+  return shiftMode;
   }
 

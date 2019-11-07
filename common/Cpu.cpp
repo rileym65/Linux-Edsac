@@ -85,6 +85,7 @@ Cpu::Cpu() {
   printer = NULL;
   reader = NULL;
   trace = 'N';
+  changes = 0;
   Reset();
   }
 
@@ -249,12 +250,27 @@ UInt32* Cpu::Acc() {
   return acc;
   }
 
+UInt32 Cpu::Address1() {
+  return address1;
+  }
+
+UInt32 Cpu::Address2() {
+  return address2;
+  }
+
 void Cpu::AttachPrinter(Printer* p) {
   printer = p;
   }
 
 void Cpu::AttachReader(Reader* r) {
   reader = r;
+  }
+
+UInt32 Cpu::Changes() {
+  UInt32 ret;
+  ret = changes;
+  changes = 0;
+  return ret;
   }
 
 String* Cpu::Disassem(UInt32 address, UInt32 order) {
@@ -411,9 +427,7 @@ fflush(stdout);
            mbAdd(&mem[address],1);
            if (trace == 'Y') printf("=%x",acc[0]);
            }
-#ifdef TEXT
-         showAcc();
-#endif
+         changes |= CH_ACC;
          break;
 
     case 12:                                     /* S - Subtract */
@@ -432,9 +446,7 @@ fflush(stdout);
            mbSub(&mem[address],1);
            if (trace == 'Y') printf("=%x",acc[0]);
            }
-#ifdef TEXT
-         showAcc();
-#endif
+         changes |= CH_ACC;
          break;
 
     case 21:                                     /* H - Load multiplier */
@@ -450,9 +462,7 @@ fflush(stdout);
            multiplier[1] = 0;
            if (trace == 'Y') printf("R = %05x",multiplier[0]);
            }
-#ifdef TEXT
-         showMult();
-#endif
+         changes |= CH_IER;
          break;
 
     case 31:                                     /* V - Multiply */
@@ -469,11 +479,7 @@ fflush(stdout);
            sMul(mem[address],'A');
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
-#ifdef TEXT
-         showMult();
-         showMultiplicand();
-         showAcc();
-#endif
+         changes |= CH_IER | CH_ICAND | CH_ACC;
          break;
 
     case 22:                                     /* N - Multiply */
@@ -487,11 +493,7 @@ fflush(stdout);
            sMul(mem[address],'S');
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
-#ifdef TEXT
-         showMult();
-         showMultiplicand();
-         showAcc();
-#endif
+         changes |= CH_IER | CH_ICAND | CH_ACC;
          break;
 
     case  5:                                     /* T - Transfer/clear */
@@ -499,23 +501,19 @@ fflush(stdout);
            address &= 0x1fffe;
            mem[address] = acc[1];
            mem[address+1] = acc[0];
-#ifdef TEXT
-           showMemory(address);
-           showMemory(address+1);
-#endif
+           changes |= CH_MEM_1 | CH_MEM_2;
+           address1 = address;
+           address2 = address+1;
            if (trace == 'Y') printf("[%d]=%5x [%d]=%5x",address+1,acc[0],address,acc[1]);
            }
          else {
            mem[address] = acc[0];
-#ifdef TEXT
-           showMemory(address);
-#endif
+           changes |= CH_MEM_1;
+           address1 = address;
            if (trace == 'Y') printf("[%d]=%x",address,acc[0]);
            }
          for (i=0; i<4; i++) acc[i] = 0;
-#ifdef TEXT
-         showAcc();
-#endif
+         changes |= CH_ACC;
          break;
 
     case  7:                                     /* U - Transfer */
@@ -524,17 +522,15 @@ fflush(stdout);
            mem[address] = acc[1];
            mem[address+1] = acc[0];
            if (trace == 'Y') printf("[%d]=%5x [%d]=%5x",address+1,acc[0],address,acc[1]);
-#ifdef TEXT
-           showMemory(address);
-           showMemory(address+1);
-#endif
+           changes |= CH_MEM_1 | CH_MEM_2;
+           address1 = address;
+           address2 = address+1;
            }
          else {
            if (trace == 'Y') printf("[%d]=%x",address,acc[0]);
            mem[address] = acc[0];
-#ifdef TEXT
-           showMemory(address);
-#endif
+           changes |= CH_MEM_1;
+           address1 = address;
            }
          break;
 
@@ -551,10 +547,7 @@ fflush(stdout);
            doAnd();
            if (trace == 'Y') printf(" %05x",acc[0]);
            }
-#ifdef TEXT
-           showMultiplicand(cpu);
-           showAcc(cpu);
-#endif
+         changes |= CH_ICAND | CH_ACC;
          break;
 
     case  4:                                     /* R - Shift right */
@@ -566,9 +559,7 @@ fflush(stdout);
            }
          if (trace == 'Y') 
            printf("%05x %05x %05x%05x",acc[0],acc[1],acc[2],acc[3]);
-#ifdef TEXT
-         showAcc(cpu);
-#endif
+         changes |= CH_ACC;
          break;
 
     case 25:                                     /* L - Shift left */
@@ -580,9 +571,7 @@ fflush(stdout);
            }
          if (trace == 'Y') 
            printf("%05x %05x %05x%05x",acc[0],acc[1],acc[2],acc[3]);
-#ifdef TEXT
-         showAcc(cpu);
-#endif
+         changes |= CH_ACC;
          break;
 
     case  3:                                     /* E - Branch positive */
@@ -608,7 +597,13 @@ fflush(stdout);
            if (order & 1) address &= 0x1fffe;
            if (trace == 'Y') printf("[%d]=%x",address+(order & 1),b);
            mem[address + (order & 1)] = b;
-           if (order & 1) mem[address] = 0;
+           changes |= CH_MEM_1;
+           address1 = address + (order & 1);
+           if (order & 1) {
+             changes |= CH_MEM_2;
+             address2 = address;
+             mem[address] = 0;
+             }
            }
          break;
 
@@ -628,9 +623,7 @@ fflush(stdout);
 
     case  6:                                     /* Y - Extend ABC */
          roundAcc();
-#ifdef TEXT
-         showAcc();
-#endif
+         changes |= CH_ACC;
          break;
 
     case 13:                                     /* Z - Stop */

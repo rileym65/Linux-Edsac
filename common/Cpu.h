@@ -8,14 +8,23 @@ using namespace SmrFramework;
 #include "Printer.h"
 #include "Reader.h"
 
+#define CH_ACC       1
+#define CH_IER       2
+#define CH_ICAND     4
+#define CH_MEM_1     8
+#define CH_MEM_2    16
+
 class Cpu {
   protected:
+    UInt32 address1;
+    UInt32 address2;
     UInt32 order;
     UInt32 scr;
     UInt32 mem[1024];
     UInt32 multiplier[2];
     UInt32 multiplicand[2];
     UInt32 acc[4];
+    UInt32 changes;
     Byte   lastOutput;
     Int32  initialOrders;
     Printer* printer;
@@ -40,6 +49,9 @@ class Cpu {
     UInt32  *Acc();
     void     AttachPrinter(Printer* p);
     void     AttachReader(Reader* r);
+    UInt32   Address1();
+    UInt32   Address2();
+    UInt32   Changes();
     String  *Disassem(UInt32 address, UInt32 order);
     UInt32   Fetch(UInt32 addr);
     Printer *GetPrinter();

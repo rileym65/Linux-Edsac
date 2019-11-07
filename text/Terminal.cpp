@@ -6,7 +6,7 @@
 #include "Terminal.h"
 
 typedef struct {
-  char* escape_sequence;
+  const char* escape_sequence;
   int   value;
   } KEYDEF;
 

@@ -31,6 +31,7 @@ class Cpu {
     Reader*  reader;
     Boolean  stopCommand;
     Boolean  only1949;
+    Boolean  overflow;
     char     trace;
     void   doAnd();
     void   doMul(char mode);

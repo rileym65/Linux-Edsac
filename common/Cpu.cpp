@@ -87,6 +87,7 @@ Cpu::Cpu() {
   trace = 'N';
   changes = 0;
   only1949 = false;
+  overflow = false;
   Reset();
   }
 
@@ -164,11 +165,23 @@ void Cpu::lShift(UInt32* number,UInt32 num) {
 void Cpu::mbAdd(UInt32* value,Int32 words) {
   Byte c;
   Int32  i;
+  Boolean signCheck;
+  UInt32 sign;
+  signCheck = ((value[0] & 0x10000) == (acc[0] & 0x10000));
+  if (signCheck) sign = acc[0] & 0x10000;
   c = 0;
   for (i=words-1; i>= 0; i--) {
     acc[i] += (value[i] + c);
     c = (acc[i] & 0x40000) ? 1 : 0;
     acc[i] &= 0x3ffff;
+    }
+  if (signCheck) {
+    if (acc[0] >= 0x20000) {
+      overflow = true;
+      }
+    if (sign != (acc[0] & 0x10000)) {
+      overflow = true;
+      }
     }
   acc[0] &= 0x1ffff;
   }
@@ -626,9 +639,18 @@ void Cpu::Step() {
     case 26:                                     /* X - Nop */
          break;
 
-    case  6:                                     /* Y - Extend ABC */
-         roundAcc();
-         changes |= CH_ACC;
+    case  6:                                     /* Y */
+         if (order & 1) {                        /* Y - Jump on overflow */
+           if (overflow) {
+             if (trace == 'Y') printf("Overflow, jumping --> %d",address);
+             scr = address;
+             overflow = false;
+             }
+           }
+         else {                                  /* Y - Extend ABC */
+           roundAcc();
+           changes |= CH_ACC;
+           }
          break;
 
     case 13:                                     /* Z - Stop */

@@ -25,6 +25,7 @@ class Cpu {
     UInt32 multiplicand[2];
     UInt32 acc[4];
     UInt32 changes;
+    Int32  b;
     Byte   lastOutput;
     Int32  initialOrders;
     Printer* printer;
@@ -35,8 +36,10 @@ class Cpu {
     char     trace;
     void   doAnd();
     void   doMul(char mode);
+    UInt32 fetchB(UInt32 address, Boolean indexed);
+    void   storeB(UInt32 address, Boolean indexed, UInt32 value);
     Byte   getShiftCount(UInt32 a);
-    void   lMul(UInt32 address,char mode);
+    void   lMul(UInt32 hi,UInt32 lo,char mode);
     void   lShift(UInt32* number, UInt32 num);
     void   mbAdd(UInt32* value,Int32 words);
     void   mbSub(UInt32* value,Int32 words);

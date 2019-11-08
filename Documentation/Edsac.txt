@@ -62,6 +62,13 @@ EnL     If a >= 0 clear the accumulator and jump to n
 GnL     if a < 0 clear the accumulator and jump to n
 YnL     If overflow in A has occured since last YL goto n
 
+BnS     Set B register to n
+BnL     Set B register to -n
+BSn     Increase B register by n
+BSnS    Decrease B register by n
+JnS     Jump to n if B != 0
+
+
 Shift values:
 
     0 L    - 1

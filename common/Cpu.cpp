@@ -86,6 +86,7 @@ Cpu::Cpu() {
   reader = NULL;
   trace = 'N';
   changes = 0;
+  b = 0;
   only1949 = false;
   overflow = false;
   Reset();
@@ -132,6 +133,19 @@ void Cpu::doMul(char mode) {
     }
   }
 
+UInt32 Cpu::fetchB(UInt32 address, Boolean indexed) {
+  if (!indexed) return mem[address];
+  return mem[(address+b) & 0x3ff];
+  }
+
+void Cpu::storeB(UInt32 address, Boolean indexed, UInt32 value) {
+  if (!indexed) {
+    mem[address] = value;
+    return;
+    }
+  mem[(address + b) & 0x3ff] = value;
+  }
+
 Byte Cpu::getShiftCount(UInt32 a) {
   Byte r;
   r = 1;
@@ -142,11 +156,11 @@ Byte Cpu::getShiftCount(UInt32 a) {
   return r;
   }
 
-void Cpu::lMul(UInt32 address,char mode) {
+void Cpu::lMul(UInt32 hi,UInt32 lo,char mode) {
   Int32 i;
   UInt32 c,t;
-  multiplicand[1] = mem[address];
-  multiplicand[0] = mem[address+1];
+  multiplicand[1] = hi;
+  multiplicand[0] = lo;
   doMul(mode);
   }
 
@@ -400,6 +414,7 @@ void Cpu::Reset() {
   for (i=0; i<1024; i++) mem[i] = 0;
   for (i=0; i<4; i++) acc[i] = 0;
   scr = 0;
+  b = 0;
   }
 
 UInt32 Cpu::Scr() {
@@ -415,6 +430,7 @@ void Cpu::Start() {
   if (initialOrders == 1) LoadOrders1();
   if (initialOrders == 2) LoadOrders2();
   scr = 0;
+  b = 0;
   stopCommand = false;
   }
 
@@ -425,6 +441,7 @@ void Cpu::Step() {
   UInt32 address;
   UInt32 tmp[2];
   String *line;
+  Boolean indexed;
   order = Fetch(scr);
   if (trace == 'Y') {
     line = Disassem(scr, order);
@@ -432,6 +449,7 @@ void Cpu::Step() {
     delete(line);
     }
   scr++;
+  indexed = (order & 0x800) ? true : false;
   address = (order >> 1) & 0x3ff;
   switch (order >> 12) {
     case 28:                                     /* A - Add */
@@ -439,15 +457,16 @@ void Cpu::Step() {
            address &= 0x1fffe;
            if (trace == 'Y')
              printf("%05x %05x + %05x %05x =",acc[0],acc[1],
-                    mem[address+1],mem[address]);
-           tmp[0] = mem[address+1];
-           tmp[1] = mem[address];
+                    fetchB(address+1,indexed),fetchB(address,indexed));
+           tmp[0] = fetchB(address+1,indexed);
+           tmp[1] = fetchB(address,indexed);
            mbAdd(tmp,2);
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
          else  {
-           if (trace == 'Y') printf("%x+%x",acc[0],mem[address]);
-           mbAdd(&mem[address],1);
+           if (trace == 'Y') printf("%x+%x",acc[0],fetchB(address,indexed));
+           tmp[0] = fetchB(address,indexed);
+           mbAdd(tmp,1);
            if (trace == 'Y') printf("=%x",acc[0]);
            }
          changes |= CH_ACC;
@@ -458,15 +477,16 @@ void Cpu::Step() {
            address &= 0x1fffe;
            if (trace == 'Y')
              printf("%05x %05x - %05x %05x =",acc[0],acc[1],
-                    mem[address+1],mem[address]);
-           tmp[0] = mem[address+1];
-           tmp[1] = mem[address];
+                    fetchB(address+1,indexed),fetchB(address,indexed));
+           tmp[0] = fetchB(address+1,indexed);
+           tmp[1] = fetchB(address,indexed);
            mbSub(tmp,2);
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
          else {
-           if (trace == 'Y') printf("%x-%x",acc[0],mem[address]);
-           mbSub(&mem[address],1);
+           if (trace == 'Y') printf("%x-%x",acc[0],fetchB(address,indexed));
+           tmp[0] = fetchB(address,indexed);
+           mbSub(tmp,1);
            if (trace == 'Y') printf("=%x",acc[0]);
            }
          changes |= CH_ACC;
@@ -475,13 +495,13 @@ void Cpu::Step() {
     case 21:                                     /* H - Load multiplier */
          if (order & 1) {
            address &= 0x1fffe;
-           multiplier[0] = mem[address+1];
-           multiplier[1] = mem[address];
+           multiplier[0] = fetchB(address+1,indexed);
+           multiplier[1] = fetchB(address,indexed);
            if (trace == 'Y')
              printf("R = %05x %05x",multiplier[0],multiplier[1]);
            }
          else {
-           multiplier[0] = mem[address];
+           multiplier[0] = fetchB(address,indexed);
            multiplier[1] = 0;
            if (trace == 'Y') printf("R = %05x",multiplier[0]);
            }
@@ -492,14 +512,14 @@ void Cpu::Step() {
          if (order & 1) {
            if (trace == 'Y')
              printf("%05x %05x * %05x %05x = ",multiplier[0],
-                    multiplier[1],mem[address+1],mem[address]);
-           lMul(address,'A');
+                    multiplier[1],fetchB(address+1,indexed),fetchB(address,indexed));
+           lMul(fetchB(address,indexed),fetchB(address+1,indexed),'A');
            if (trace == 'Y')
              printf("%05x %05x %05x%05x",acc[0],acc[1],acc[2],
                     acc[3]);
            } else {
-           if (trace == 'Y') printf("%05x * %05x = ",multiplier[0],mem[address]);
-           sMul(mem[address],'A');
+           if (trace == 'Y') printf("%05x * %05x = ",multiplier[0],fetchB(address,indexed));
+           sMul(fetchB(address,indexed),'A');
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
          changes |= CH_IER | CH_ICAND | CH_ACC;
@@ -507,13 +527,14 @@ void Cpu::Step() {
 
     case 22:                                     /* N - Multiply */
          if (order & 1) {
-           if (trace == 'Y') printf("%05x %05x * %05x %05x = ",multiplier[0],multiplier[1],mem[address+1],mem[address]);
-           lMul(address,'S');
+           if (trace == 'Y') printf("%05x %05x * %05x %05x = ",
+             multiplier[0],multiplier[1],fetchB(address+1,indexed),fetchB(address,indexed));
+           lMul(fetchB(address,indexed),fetchB(address+1,indexed),'S');
            if (trace == 'Y') printf("%05x %05x %05x%05x",acc[0],acc[1],acc[2],acc[3]);
            }
          else {
-           if (trace == 'Y') printf("%05x * %05x = ",multiplier[0],mem[address]);
-           sMul(mem[address],'S');
+           if (trace == 'Y') printf("%05x * %05x = ",multiplier[0],fetchB(address,indexed));
+           sMul(fetchB(address,indexed),'S');
            if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
            }
          changes |= CH_IER | CH_ICAND | CH_ACC;
@@ -522,15 +543,15 @@ void Cpu::Step() {
     case  5:                                     /* T - Transfer/clear */
          if (order & 1) {
            address &= 0x1fffe;
-           mem[address] = acc[1];
-           mem[address+1] = acc[0];
+           storeB(address,indexed,acc[1]);
+           storeB(address+1,indexed,acc[0]);
            changes |= CH_MEM_1 | CH_MEM_2;
            address1 = address;
            address2 = address+1;
            if (trace == 'Y') printf("[%d]=%5x [%d]=%5x",address+1,acc[0],address,acc[1]);
            }
          else {
-           mem[address] = acc[0];
+           storeB(address,indexed,acc[0]);
            changes |= CH_MEM_1;
            address1 = address;
            if (trace == 'Y') printf("[%d]=%x",address,acc[0]);
@@ -542,8 +563,8 @@ void Cpu::Step() {
     case  7:                                     /* U - Transfer */
          if (order & 1) {
            address &= 0x1fffe;
-           mem[address] = acc[1];
-           mem[address+1] = acc[0];
+           storeB(address,indexed,acc[1]);
+           storeB(address+1,indexed,acc[0]);
            if (trace == 'Y') printf("[%d]=%5x [%d]=%5x",address+1,acc[0],address,acc[1]);
            changes |= CH_MEM_1 | CH_MEM_2;
            address1 = address;
@@ -551,7 +572,7 @@ void Cpu::Step() {
            }
          else {
            if (trace == 'Y') printf("[%d]=%x",address,acc[0]);
-           mem[address] = acc[0];
+           storeB(address,indexed,acc[0]);
            changes |= CH_MEM_1;
            address1 = address;
            }
@@ -559,12 +580,12 @@ void Cpu::Step() {
 
     case 30:                                     /* C - Collate */
          if (order & 1) {
-           multiplicand[0] = mem[address+1];
-           multiplicand[1] = mem[address];
+           multiplicand[0] = fetchB(address+1,indexed);
+           multiplicand[1] = fetchB(address,indexed);
            doAnd();
            }
          else {
-           multiplicand[0] = mem[address];
+           multiplicand[0] = fetchB(address,indexed);
            multiplicand[1] = 0;
            if (trace == 'Y') printf("%05x + (%05x & %05x) =",acc[0],multiplier[0],multiplicand[0]);
            doAnd();
@@ -631,19 +652,19 @@ void Cpu::Step() {
          if (b != 255) {
            if (order & 1) address &= 0x1fffe;
            if (trace == 'Y') printf("[%d]=%x",address+(order & 1),b);
-           mem[address + (order & 1)] = b;
+           storeB(address + (order & 1),indexed,b);
            changes |= CH_MEM_1;
            address1 = address + (order & 1);
            if (order & 1) {
              changes |= CH_MEM_2;
              address2 = address;
-             mem[address] = 0;
+             storeB(address,indexed,0);
              }
            }
          break;
 
     case  9:                                     /* O - Output */
-         b = (mem[address] >> 12) & 0x1ff;
+         b = (fetchB(address,indexed) >> 12) & 0x1ff;
          if (printer != NULL) printer->Print(b);
          lastOutput = b;
          break;
@@ -677,15 +698,16 @@ void Cpu::Step() {
              address &= 0x1fffe;
              if (trace == 'Y')
                printf("%05x %05x + %05x %05x =",acc[0],acc[1],
-                      mem[address+1],mem[address]);
-             tmp[0] = mem[address+1];
-             tmp[1] = mem[address];
+                      fetchB(address+1,indexed),fetchB(address,indexed));
+             tmp[0] = fetchB(address+1,indexed);
+             tmp[1] = fetchB(address,indexed);
              mbAdd(tmp,2);
              if (trace == 'Y') printf("%05x %05x",acc[0],acc[1]);
              }
            else  {
-             if (trace == 'Y') printf("%x+%x",acc[0],mem[address]);
-             mbAdd(&mem[address],1);
+             if (trace == 'Y') printf("%x+%x",acc[0],fetchB(address,indexed));
+             tmp[0] = fetchB(address, indexed);
+             mbAdd(tmp,1);
              if (trace == 'Y') printf("=%x",acc[0]);
              }
            changes |= CH_ACC;
@@ -707,6 +729,48 @@ void Cpu::Step() {
            else {
              if (trace == 'Y') printf("Jumping --> %d",address);
              scr = address;
+             }
+           }
+         else {
+           printf("Bad instruction\n");
+           stopCommand = true;
+           }
+         break;
+
+    case 29:                                     /* B - Load b register */
+         if (!only1949) {
+           if (order & 0x800) {
+             if (order & 1) {
+               b -= address;
+               if (trace == 'Y') printf("b+=%x = %x",address,b);
+               }
+             else {
+               b += address;
+               if (trace == 'Y') printf("b+=%x = %x",address,b);
+               }
+             }
+           else {
+             if (order & 1) {
+               b = -address;
+               if (trace == 'Y') printf("b=%x",b);
+               }
+             else {
+               b = address;
+               if (trace == 'Y') printf("b=%x",b);
+               }
+             }
+           }
+         else {
+           printf("Bad instruction\n");
+           stopCommand = true;
+           }
+         break;
+
+    case 10:                                     /* J - Jump if B != 0 */
+         if (!only1949) {
+           if (b != 0) {
+             scr = address;
+             if (trace == 'Y') printf("Jumping --> %d",address);
              }
            }
          else {

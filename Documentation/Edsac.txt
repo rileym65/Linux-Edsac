@@ -1,3 +1,13 @@
+Command line:
+  edsac [switches] [tape]
+
+  -d      - Start in debug mode
+  -1      - Set initial orders 1
+  -2      - Set initial orders 2
+  -t      - Enable instruction trace
+  -1949   - Allow only original 1949 instructions
+ 
+
 Perforator           Teleprinter           Binary    Decimal
 Letter figure        Letter Figure
 P      0             P      0              00000     0

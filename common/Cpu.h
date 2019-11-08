@@ -25,7 +25,7 @@ class Cpu {
     UInt32 multiplicand[2];
     UInt32 acc[4];
     UInt32 changes;
-    Int32  b;
+    Int32  breg;
     Byte   lastOutput;
     Int32  initialOrders;
     Printer* printer;
@@ -68,6 +68,8 @@ class Cpu {
     UInt32  *Memory();
     UInt32  *Multiplicand();
     UInt32  *Multiplier();
+    Boolean  Only1949();
+    Boolean  Only1949(Boolean b);
     UInt32   Order();
     void     Reset();
     UInt32   Scr();

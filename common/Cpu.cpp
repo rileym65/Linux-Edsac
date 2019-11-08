@@ -86,7 +86,7 @@ Cpu::Cpu() {
   reader = NULL;
   trace = 'N';
   changes = 0;
-  b = 0;
+  breg = 0;
   only1949 = false;
   overflow = false;
   Reset();
@@ -135,7 +135,7 @@ void Cpu::doMul(char mode) {
 
 UInt32 Cpu::fetchB(UInt32 address, Boolean indexed) {
   if (!indexed) return mem[address];
-  return mem[(address+b) & 0x3ff];
+  return mem[(address+breg) & 0x3ff];
   }
 
 void Cpu::storeB(UInt32 address, Boolean indexed, UInt32 value) {
@@ -143,7 +143,7 @@ void Cpu::storeB(UInt32 address, Boolean indexed, UInt32 value) {
     mem[address] = value;
     return;
     }
-  mem[(address + b) & 0x3ff] = value;
+  mem[(address + breg) & 0x3ff] = value;
   }
 
 Byte Cpu::getShiftCount(UInt32 a) {
@@ -405,6 +405,15 @@ UInt32* Cpu::Multiplier() {
   return multiplier;
   }
 
+Boolean Cpu::Only1949() {
+  return only1949;
+  }
+
+Boolean Cpu::Only1949(Boolean b) {
+  only1949 = b;
+  return only1949;
+  }
+
 UInt32 Cpu::Order() {
   return order;
   }
@@ -414,7 +423,7 @@ void Cpu::Reset() {
   for (i=0; i<1024; i++) mem[i] = 0;
   for (i=0; i<4; i++) acc[i] = 0;
   scr = 0;
-  b = 0;
+  breg = 0;
   }
 
 UInt32 Cpu::Scr() {
@@ -430,7 +439,7 @@ void Cpu::Start() {
   if (initialOrders == 1) LoadOrders1();
   if (initialOrders == 2) LoadOrders2();
   scr = 0;
-  b = 0;
+  breg = 0;
   stopCommand = false;
   }
 
@@ -741,22 +750,22 @@ void Cpu::Step() {
          if (!only1949) {
            if (order & 0x800) {
              if (order & 1) {
-               b -= address;
-               if (trace == 'Y') printf("b+=%x = %x",address,b);
+               breg -= address;
+               if (trace == 'Y') printf("b+=%x = %x",address,breg);
                }
              else {
-               b += address;
-               if (trace == 'Y') printf("b+=%x = %x",address,b);
+               breg += address;
+               if (trace == 'Y') printf("b+=%x = %x",address,breg);
                }
              }
            else {
              if (order & 1) {
-               b = -address;
-               if (trace == 'Y') printf("b=%x",b);
+               breg = -address;
+               if (trace == 'Y') printf("b=%x",breg);
                }
              else {
-               b = address;
-               if (trace == 'Y') printf("b=%x",b);
+               breg = address;
+               if (trace == 'Y') printf("b=%x",breg);
                }
              }
            }
@@ -768,7 +777,7 @@ void Cpu::Step() {
 
     case 10:                                     /* J - Jump if B != 0 */
          if (!only1949) {
-           if (b != 0) {
+           if (breg != 0) {
              scr = address;
              if (trace == 'Y') printf("Jumping --> %d",address);
              }

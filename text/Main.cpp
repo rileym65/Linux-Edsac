@@ -198,6 +198,7 @@ int main(int argc,char** argv) {
     if (strcmp(argv[i],"-1") == 0) initialOrders = 1;
     if (strcmp(argv[i],"-2") == 0) initialOrders = 2;
     if (strcmp(argv[i],"-t") == 0) cpu->Trace('Y');
+    if (strcmp(argv[i],"-1949") == 0) cpu->Only1949(true);
     if (argv[i][0] != '-') {
       strcpy(tapeFilename,argv[i]);
       if (tapeFilename[strlen(tapeFilename)-1] == '1') initialOrders = 1;

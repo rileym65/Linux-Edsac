@@ -58,7 +58,8 @@ class Cpu {
     UInt32   Fetch(UInt32 addr);
     Printer *GetPrinter();
     Reader  *GetReader();
-    void     InitialOrders(Int32 i);
+    Int32    InitialOrders();
+    Int32    InitialOrders(Int32 i);
     void     LoadOrders1();
     void     LoadOrders2();
     UInt32  *Memory();
@@ -68,6 +69,7 @@ class Cpu {
     void     Reset();
     UInt32   Scr();
     UInt32   Scr(UInt32 i);
+    void     Start();
     void     Step();
     Boolean  StopCommand();
     Boolean  StopCommand(Boolean b);

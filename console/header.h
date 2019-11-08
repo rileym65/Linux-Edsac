@@ -34,10 +34,11 @@ LINK Reader *reader;
 LINK Printer *printer;
 LINK Debug   *debugger;
 
-LINK char tapeRemark;
-LINK int  initialOrders;
-LINK long cycles;
-LINK char stopSim;
+LINK char    tapeRemark;
+LINK int     initialOrders;
+LINK long    cycles;
+LINK char    stopSim;
+LINK Boolean singleStep;
 
 
 extern void StopMode();

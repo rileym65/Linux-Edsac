@@ -16,6 +16,7 @@ int main(int argc,char** argv) {
   cpu->AttachPrinter(printer);
   debugger = new Debug(cpu);
   initialOrders = 2;
+  singleStep = false;
   strcpy(tapeFilename,"");
   for (i=1; i<argc; i++) {
     if (strcmp(argv[i],"-d") == 0) debugger->DebugMode('Y');
@@ -48,6 +49,10 @@ int main(int argc,char** argv) {
     if (!cpu->StopCommand()) {
       cpu->Step();
       cycles++;
+      if (singleStep) {
+        singleStep = false;
+        cpu->StopCommand(true);
+        }
       }
     else StopMode();
     }

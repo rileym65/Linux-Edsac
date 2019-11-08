@@ -350,8 +350,13 @@ Printer* Cpu::GetPrinter() {
   return printer;
   }
 
-void Cpu::InitialOrders(Int32 i) {
+Int32 Cpu::InitialOrders() {
+  return initialOrders;
+  }
+
+Int32 Cpu::InitialOrders(Int32 i) {
   initialOrders = i;
+  return initialOrders;
   }
 
 void Cpu::LoadOrders1() {
@@ -404,6 +409,13 @@ UInt32 Cpu::Scr() {
 UInt32 Cpu::Scr(UInt32 i) {
   scr = i;
   return scr;
+  }
+
+void Cpu::Start() {
+  if (initialOrders == 1) LoadOrders1();
+  if (initialOrders == 2) LoadOrders2();
+  scr = 0;
+  stopCommand = false;
   }
 
 void Cpu::Step() {

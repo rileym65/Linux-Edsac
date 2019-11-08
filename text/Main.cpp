@@ -191,6 +191,7 @@ int main(int argc,char** argv) {
   debugger = new Debug(cpu);
   initialOrders = 2;
   currentTank = 0;
+  singleStep = false;
   strcpy(tapeFilename,"");
   for (i=1; i<argc; i++) {
     if (strcmp(argv[i],"-d") == 0) debugger->DebugMode('Y');
@@ -223,6 +224,7 @@ int main(int argc,char** argv) {
   showMultiplicand();
   showAcc();
   stopSim = 'N';
+  HideCursor();
   if (debugger->DebugMode() == 'Y') debugger->Debugger();
   while (stopSim != 'Y') {
     if (!cpu->StopCommand()) {
@@ -236,9 +238,14 @@ int main(int argc,char** argv) {
       showScr();
       showOrder();
       cycles++;
+      if (singleStep) {
+        singleStep = false;
+        cpu->StopCommand(true);
+        }
       }
     else StopMode();
     }
+  ShowCursor();
   return 0;
   }
 

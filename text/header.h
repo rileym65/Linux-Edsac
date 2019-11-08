@@ -39,6 +39,7 @@ LINK int  initialOrders;
 LINK long cycles;
 LINK char stopSim;
 LINK Int32 currentTank;
+LINK Boolean singleStep;
 
 
 extern void StopMode();

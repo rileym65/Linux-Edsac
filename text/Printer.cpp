@@ -103,11 +103,11 @@ void Printer::Print(Byte out) {
       else {
         for (i=0; i<15; i++) {
           strcpy(printer[i], printer[i+1]);
-          GotoXY(40, i);
+          GotoXY(40, i+1);
           printf("%s",printer[i]);
           }
         strcpy(printer[15], "                                        ");
-        GotoXY(40, 15);
+        GotoXY(40, 16);
         printf("%s",printer[15]);
         }
       printerPos = 0;
@@ -149,11 +149,11 @@ void Printer::Print(const char* message) {
       else {
         for (i=0; i<15; i++) {
           strcpy(printer[i], printer[i+1]);
-          GotoXY(40, i);
+          GotoXY(40, i+1);
           printf("%s",printer[i]);
           }
         strcpy(printer[15], "                                        ");
-        GotoXY(40, 15);
+        GotoXY(40, 16);
         printf("%s",printer[15]);
         }
       printerPos = 0;

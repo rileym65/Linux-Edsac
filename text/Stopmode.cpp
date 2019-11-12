@@ -11,6 +11,8 @@ void smHelp() {
   printer->Print("STEP      - Execute 1 cycle\r\n");
   printer->Print("Tn        - Show tank n\r\n");
   printer->Print("TAPE name - Mount tape\r\n");
+  printer->Print("TRACE ON  - Turn on trace\r\n");
+  printer->Print("TRACE OFF - Turn off trace\r\n");
   printer->Print("QUIT      - Quit simulator\r\n");
   printer->Print("HELP      - Show available commands\r\n");
   }
@@ -51,11 +53,13 @@ void StopMode() {
     if (strcasecmp(buffer,"clear") == 0) smClear();
     if (strcasecmp(buffer,"orders1") == 0) cpu->InitialOrders(1);
     if (strcasecmp(buffer,"orders2") == 0) cpu->InitialOrders(2);
+    if (strcasecmp(buffer,"trace on") == 0) cpu->Trace('Y');
+    if (strcasecmp(buffer,"trace off") == 0) cpu->Trace('N');
     if (strcasecmp(buffer,"start") == 0) {
       cpu->Start();
       flag = 'Y';
       }
-    if (strcasecmp(buffer,"step") == 0) {
+    if (strcasecmp(buffer,"step") == 0 || strcasecmp(buffer,"s") == 0) {
       singleStep = true;
       cpu->StopCommand(false);
       flag = 'Y';

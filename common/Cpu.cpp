@@ -347,7 +347,6 @@ String* Cpu::Disassem(UInt32 address, UInt32 order) {
   if (initialOrders == 1) { if (order & 1) sprintf(temp," L"); else sprintf(temp," S"); }
   if (initialOrders == 2) { if (order & 1) sprintf(temp," D"); else sprintf(temp," F"); }
   strcat(buffer, temp);
-  strcat(buffer,"     ");
   return new String(buffer);
   }
 
@@ -555,7 +554,7 @@ void Cpu::Step() {
     case 31:                                     /* V - Multiply */
          if (order & 1) {
            if (trace == 'Y') {
-             sprintf(buffer2,"%05x %05x * %05x %05x = ",multiplier[0],
+             sprintf(buffer2,"%05x %05x*%05x %05x=",multiplier[0],
                     multiplier[1],fetchB(address+1,indexed),fetchB(address,indexed));
              strcat(buffer1, buffer2);
              printer->Print(buffer1);
@@ -568,7 +567,7 @@ void Cpu::Step() {
              }
            } else {
            if (trace == 'Y') {
-             sprintf(buffer2,"%05x * %05x = ",multiplier[0],fetchB(address,indexed));
+             sprintf(buffer2,"%05x*%05x=",multiplier[0],fetchB(address,indexed));
              strcat(buffer1, buffer2);
              }
            sMul(fetchB(address,indexed),'A');
@@ -725,7 +724,7 @@ void Cpu::Step() {
     case  3:                                     /* E - Branch positive */
          if ((acc[0] & 0x10000) == 0) {
            if (trace == 'Y') {
-             sprintf(buffer2,"Positive, jumping --> %d\r\n",address);
+             sprintf(buffer2,"Positive, jumping %d\r\n",address);
              strcat(buffer1, buffer2);
              printer->Print(buffer1);
              }
@@ -747,7 +746,7 @@ void Cpu::Step() {
     case 27:                                     /* G - Branch negative */
          if ((acc[0] & 0x10000) != 0) {
            if (trace == 'Y') {
-             sprintf(buffer2,"Negative, jumping --> %d\r\n",address);
+             sprintf(buffer2,"Negative, jumping %d\r\n",address);
              strcat(buffer1, buffer2);
              printer->Print(buffer1);
              }
@@ -806,7 +805,7 @@ void Cpu::Step() {
          if (order & 1) {                        /* Y - Jump on overflow */
            if (overflow) {
              if (trace == 'Y') {
-               sprintf(buffer2,"Overflow, jumping --> %d\r\n",address);
+               sprintf(buffer2,"Overflow, jumping %d\r\n",address);
                strcat(buffer1, buffer2);
                printer->Print(buffer1);
                }
@@ -881,7 +880,7 @@ void Cpu::Step() {
            if (order & 1) {
              if (acc[0] | acc[1] | acc[2] | acc[3] != 0) {
                if (trace == 'Y') {
-                 sprintf(buffer2,"Acc not zero, Jumping --> %d\r\n",address);
+                 sprintf(buffer2,"Acc not zero, Jumping %d\r\n",address);
                  strcat(buffer1, buffer2);
                  printer->Print(buffer1);
                  }
@@ -897,7 +896,7 @@ void Cpu::Step() {
              }
            else {
              if (trace == 'Y') {
-               sprintf(buffer2,"Jumping --> %d\r\n",address);
+               sprintf(buffer2,"Jumping %d\r\n",address);
                strcat(buffer1, buffer2);
                printer->Print(buffer1);
                }

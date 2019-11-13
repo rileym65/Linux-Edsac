@@ -4,15 +4,17 @@
 
 void smHelp() {
   printer->Print("0-9       - Enter number on dial and run\r\n");
+  printer->Print("BP addr   - Set breakpoint at addr\r\n");
   printer->Print("CLEAR     - Clear store\r\n");
+  printer->Print("LSBP      - List breakpoints\r\n");
   printer->Print("ORDERSn   - Set initial orders. n=1 or 2\r\n");
+  printer->Print("RMBP addr - Remove breakpoint at addr\r\n");
   printer->Print("RUN       - Continue execution\r\n");
   printer->Print("START     - Load initial orders and run\r\n");
   printer->Print("STEP      - Execute 1 cycle\r\n");
   printer->Print("Tn        - Show tank n\r\n");
   printer->Print("TAPE name - Mount tape\r\n");
-  printer->Print("TRACE ON  - Turn on trace\r\n");
-  printer->Print("TRACE OFF - Turn off trace\r\n");
+  printer->Print("TRACE st  - Turn on trace st=ON/OFF\r\n");
   printer->Print("QUIT      - Quit simulator\r\n");
   printer->Print("HELP      - Show available commands\r\n");
   }
@@ -31,8 +33,10 @@ void smClear() {
   }
 
 void StopMode() {
+  UInt32 i;
   char flag;
   char buffer[1024];
+  char buffer1[1024];
   flag = 'N';
   ShowCursor();
   while (flag != 'Y') {
@@ -49,8 +53,31 @@ void StopMode() {
       }
     if (strncasecmp(buffer,"t",1) == 0 &&
         buffer[1] >= '0' && buffer[1] <= '9') smTank(buffer+1);
+    if (strncasecmp(buffer,"bp ",3) == 0) {
+      i = atoi(buffer+3);
+      if (i < 1024) {
+        breakPoints[i] = true;
+        sprintf(buffer1,"Breakpoint set at %d\r\n",i);
+        printer->Print(buffer1);
+        }
+      }
+    if (strncasecmp(buffer,"rmbp ",5) == 0) {
+      i = atoi(buffer+5);
+      if (i < 1024) {
+        breakPoints[i] = false;
+        sprintf(buffer1,"Breakpoint removed at %d\r\n",i);
+        printer->Print(buffer1);
+        }
+      }
     if (strcasecmp(buffer,"quit") == 0) { stopSim = 'Y'; flag = 'Y'; }
     if (strcasecmp(buffer,"clear") == 0) smClear();
+    if (strcasecmp(buffer,"listbp") == 0) {
+      for (i=0; i<1024; i++)
+        if (breakPoints[i]) {
+          sprintf(buffer1,"Breakpoint: %d\r\n",i);
+          printer->Print(buffer1);
+          }
+      }
     if (strcasecmp(buffer,"orders1") == 0) cpu->InitialOrders(1);
     if (strcasecmp(buffer,"orders2") == 0) cpu->InitialOrders(2);
     if (strcasecmp(buffer,"trace on") == 0) cpu->Trace('Y');

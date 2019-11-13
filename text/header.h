@@ -34,11 +34,12 @@ LINK Reader *reader;
 LINK Printer *printer;
 LINK Debug   *debugger;
 
-LINK char tapeRemark;
-LINK int  initialOrders;
-LINK long cycles;
-LINK char stopSim;
-LINK Int32 currentTank;
+LINK Boolean breakPoints[1024];
+LINK char    tapeRemark;
+LINK int     initialOrders;
+LINK long    cycles;
+LINK char    stopSim;
+LINK Int32   currentTank;
 LINK Boolean singleStep;
 
 

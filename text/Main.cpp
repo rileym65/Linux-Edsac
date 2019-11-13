@@ -177,12 +177,14 @@ void showTank(int tank) {
   }
 
 int main(int argc,char** argv) {
-  byte i;
+  UInt32 i;
   UInt32 changes;
   char tapeFilename[1024];
+  char buffer[1024];
   for (i=0; i<4; i++) lastAcc[i] = 0xffffffff;
   for (i=0; i<2; i++) lastMultiplier[i] = 0xffffffff;
   for (i=0; i<2; i++) lastMultiplicand[i] = 0xffffffff;
+  for (i=0; i<1024; i++) breakPoints[i] = false;
   cpu = new Cpu();
   reader = new Reader();
   printer = new Printer();
@@ -242,6 +244,11 @@ int main(int argc,char** argv) {
       if (singleStep) {
         singleStep = false;
         cpu->StopCommand(true);
+        }
+      if (breakPoints[cpu->Scr() & 0x3ff]) {
+        cpu->StopCommand(true);
+        sprintf(buffer,"Break at %d\r\n",cpu->Scr());
+        printer->Print(buffer);
         }
       }
     else StopMode();

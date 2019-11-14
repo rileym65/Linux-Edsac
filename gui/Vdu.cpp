@@ -220,6 +220,10 @@ void Vdu::Redraw() {
          redrawSingle(data[0],data[1], 85, 0);
          redrawSingle(data[2],data[3], 115, 2);
          break;
+    case Counter:
+         data = cpu->Cycles();
+         redrawSingle(data[1], data[0], 100, 0);
+         break;
     case    Scr: redrawSingle(cpu->Scr(), 0, 100, 0); break;
     case Memory: redrawStore(); break;
     case  Order: redrawSingle(cpu->Order(), 0, 100, 0); break;
@@ -244,6 +248,10 @@ void Vdu::Cycle() {
          data = cpu->Acc();
          cycleSingle(data[0],data[1], 85, 0);
          cycleSingle(data[2],data[3], 115, 2);
+         break;
+    case Counter:
+         data = cpu->Cycles();
+         cycleSingle(data[1], data[0], 100, 0);
          break;
     case    Scr: cycleSingle(cpu->Scr(), 0, 100, 0); break;
     case Memory: cycleStore(); break;

@@ -28,6 +28,7 @@ class Cpu {
     Int32  breg;
     Byte   lastOutput;
     Int32  initialOrders;
+    UInt32   cycles[2];
     Printer* printer;
     Reader*  reader;
     Boolean  stopCommand;
@@ -57,6 +58,7 @@ class Cpu {
     UInt32   Address1();
     UInt32   Address2();
     UInt32   Changes();
+    UInt32  *Cycles();
     String  *Disassem(UInt32 address, UInt32 order);
     UInt32   Fetch(UInt32 addr);
     Printer *GetPrinter();

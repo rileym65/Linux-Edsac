@@ -89,6 +89,8 @@ Cpu::Cpu() {
   breg = 0;
   only1949 = false;
   overflow = false;
+  cycles[0] = 0;
+  cycles[1] = 0;
   Reset();
   }
 
@@ -301,6 +303,10 @@ UInt32 Cpu::Changes() {
   return ret;
   }
 
+UInt32* Cpu::Cycles() {
+  return cycles;
+  }
+
 String* Cpu::Disassem(UInt32 address, UInt32 order) {
   char buffer[256];
   char temp[64];
@@ -423,6 +429,8 @@ void Cpu::Reset() {
   for (i=0; i<4; i++) acc[i] = 0;
   scr = 0;
   breg = 0;
+  cycles[0] = 0;
+  cycles[1] = 0;
   }
 
 UInt32 Cpu::Scr() {
@@ -440,6 +448,8 @@ void Cpu::Start() {
   scr = 0;
   breg = 0;
   stopCommand = false;
+  cycles[0] = 0;
+  cycles[1] = 0;
   }
 
 void Cpu::Step() {
@@ -452,6 +462,11 @@ void Cpu::Step() {
   char    buffer1[128];
   char    buffer2[128];
   Boolean indexed;
+  cycles[0]++;
+  if (cycles[0] == 0x40000) {
+    cycles[0] = 0;
+    cycles[1]++;
+    }
   order = Fetch(scr);
   if (trace == 'Y') {
     line = Disassem(scr, order);

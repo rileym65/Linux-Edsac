@@ -45,6 +45,8 @@ int main(int argc, char** argv) {
   toggleOn = new Image(new MemoryStream(toggle_dn, toggle_dn_length));
   stopOn = new Image(new MemoryStream(stop_on, stop_on_length));
   stopOff = new Image(new MemoryStream(stop_off, stop_off_length));
+  pushOn = new Image(new MemoryStream(push_on, push_on_length));
+  pushOff = new Image(new MemoryStream(push_off, push_off_length));
 
   window = new MainWindow(1000, 700);
   window->BorderWidth(5);

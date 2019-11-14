@@ -38,8 +38,8 @@ void MainWindow::InitializeComponent() {
   clearButton = new Button(this, CLEAR_X, CLEAR_Y, SW_W, SW_H);
   clearButton->Visible(true);
   clearButton->BorderWidth(0);
-  clearButton->BackgroundImage(toggleOff);
-  clearButton->PressedImage(toggleOn);
+  clearButton->BackgroundImage(pushOff);
+  clearButton->PressedImage(pushOn);
   clearButton->OnPress(new EventHandler(MainWindow::_clearButtonPressed, this));
   this->Add(clearButton);
 
@@ -51,8 +51,8 @@ void MainWindow::InitializeComponent() {
   startButton = new Button(this, START_X, START_Y, SW_W, SW_H);
   startButton->Visible(true);
   startButton->BorderWidth(0);
-  startButton->BackgroundImage(toggleOff);
-  startButton->PressedImage(toggleOn);
+  startButton->BackgroundImage(pushOff);
+  startButton->PressedImage(pushOn);
   startButton->OnPress(new EventHandler(MainWindow::_startButtonPressed, this));
   this->Add(startButton);
 
@@ -64,8 +64,8 @@ void MainWindow::InitializeComponent() {
   stopButton = new Button(this, STOP_X, STOP_Y, SW_W, SW_H);
   stopButton->Visible(true);
   stopButton->BorderWidth(0);
-  stopButton->BackgroundImage(toggleOff);
-  stopButton->PressedImage(toggleOn);
+  stopButton->BackgroundImage(pushOff);
+  stopButton->PressedImage(pushOn);
   stopButton->OnPress(new EventHandler(MainWindow::_stopButtonPressed, this));
   this->Add(stopButton);
 
@@ -77,8 +77,8 @@ void MainWindow::InitializeComponent() {
   resetButton = new Button(this, RESET_X, RESET_Y, SW_W, SW_H);
   resetButton->Visible(true);
   resetButton->BorderWidth(0);
-  resetButton->BackgroundImage(toggleOff);
-  resetButton->PressedImage(toggleOn);
+  resetButton->BackgroundImage(pushOff);
+  resetButton->PressedImage(pushOn);
   resetButton->OnPress(new EventHandler(MainWindow::_resetButtonPressed, this));
   this->Add(resetButton);
 
@@ -90,8 +90,8 @@ void MainWindow::InitializeComponent() {
   stepButton = new Button(this, STEP_X, STEP_Y, SW_W, SW_H);
   stepButton->Visible(true);
   stepButton->BorderWidth(0);
-  stepButton->BackgroundImage(toggleOff);
-  stepButton->PressedImage(toggleOn);
+  stepButton->BackgroundImage(pushOff);
+  stepButton->PressedImage(pushOn);
   stepButton->OnPress(new EventHandler(MainWindow::_stepButtonPressed, this));
   this->Add(stepButton);
 

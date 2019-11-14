@@ -37,6 +37,12 @@ void MainWindow::TimerTick(void* sender) {
     if (stopped) stopLamp->BackgroundImage(stopOn);
       else stopLamp->BackgroundImage(stopOff);
     }
+  vdu1->Cycle();
+  vdu2->Cycle();
+  vdu3->Cycle();
+  vdu4->Cycle();
+  vdu5->Cycle();
+  vdu6->Cycle();
   timer->Start();
   }
 

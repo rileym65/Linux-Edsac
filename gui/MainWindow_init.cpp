@@ -108,36 +108,42 @@ void MainWindow::InitializeComponent() {
 
   vdu1 = new Vdu(this, VDU1_X, VDU1_Y, VDU_W, VDU_H);
   vdu1->BackgroundColor(0x8000, 0x8000, 0x8000);
+  vdu1->Mode(Vdu::Counter);
   vdu1->Visible(true);
   vdu1->BorderWidth(0);
   this->Add(vdu1);
 
   vdu2 = new Vdu(this, VDU2_X, VDU2_Y, VDU_W, VDU_H);
   vdu2->BackgroundColor(0x8000, 0x8000, 0x8000);
+  vdu2->Mode(Vdu::Memory);
   vdu2->Visible(true);
   vdu2->BorderWidth(0);
   this->Add(vdu2);
 
   vdu3 = new Vdu(this, VDU3_X, VDU3_Y, VDU_W, VDU_H);
   vdu3->BackgroundColor(0x8000, 0x8000, 0x8000);
+  vdu3->Mode(Vdu::Csr);
   vdu3->Visible(true);
   vdu3->BorderWidth(0);
   this->Add(vdu3);
 
   vdu4 = new Vdu(this, VDU4_X, VDU4_Y, VDU_W, VDU_H);
   vdu4->BackgroundColor(0x8000, 0x8000, 0x8000);
+  vdu4->Mode(Vdu::Order);
   vdu4->Visible(true);
   vdu4->BorderWidth(0);
   this->Add(vdu4);
 
   vdu5 = new Vdu(this, VDU5_X, VDU5_Y, VDU_W, VDU_H);
   vdu5->BackgroundColor(0x8000, 0x8000, 0x8000);
+  vdu5->Mode(Vdu::Accumulator);
   vdu5->Visible(true);
   vdu5->BorderWidth(0);
   this->Add(vdu5);
 
   vdu6 = new Vdu(this, VDU6_X, VDU6_Y, VDU_W, VDU_H);
   vdu6->BackgroundColor(0x8000, 0x8000, 0x8000);
+  vdu6->Mode(Vdu::Multiplier);
   vdu6->Visible(true);
   vdu6->BorderWidth(0);
   this->Add(vdu6);

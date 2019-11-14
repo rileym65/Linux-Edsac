@@ -9,11 +9,13 @@ using namespace SmrFramework;
 
 class CpuThread : public Thread {
   protected:
-    Cpu *cpu;
+    Boolean step;
+    Cpu    *cpu;
     virtual void execute(void* arg);
   public:
     CpuThread(Cpu* c);
     ~CpuThread();
+    void Step();
   };
 
 #endif

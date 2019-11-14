@@ -24,6 +24,7 @@ void MainWindow::startButtonPressed(void* sender, MouseEventArgs args) {
   }
 
 void MainWindow::stepButtonPressed(void* sender, MouseEventArgs args) {
+  cpuThread->Step();
   }
 
 void MainWindow::stopButtonPressed(void* sender, MouseEventArgs args) {

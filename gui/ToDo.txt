@@ -1,0 +1,13 @@
+  Add phone dial input
+
+  Add simulated printer
+
+  Add a method from the GUI to load a new tape
+
+  Add debugger/trace capability
+
+  Add a selector for the long tank VDU
+
+  Add switches to turn the VDUs on/off
+
+  Add index lines to register VDUs to make it easier to read values

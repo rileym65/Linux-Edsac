@@ -11,12 +11,14 @@ class Vdu : public Control {
     UInt32 lines[32];
     Byte   mode;
     Byte   tank;
+    void   cycleSingle(UInt32 hi, UInt32 lo,UInt32 y, Byte start);
     void   cycleStore();
+    void   redrawSingle(UInt32 hi, UInt32 lo,UInt32 y, Byte start);
     void   redrawStore();
   public:
     static const Byte Memory = 0;
     static const Byte Counter = 1;
-    static const Byte Csr = 2;
+    static const Byte Scr = 2;
     static const Byte Order = 3;
     static const Byte Accumulator = 4;
     static const Byte Multiplier = 5;

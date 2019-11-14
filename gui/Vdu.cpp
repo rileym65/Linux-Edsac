@@ -10,6 +10,74 @@ Vdu::Vdu(Control* parent, int x, int y, int w, int h) : Control(parent, x, y, w,
 Vdu::~Vdu() {
   }
 
+void Vdu::cycleSingle(UInt32 hi, UInt32 lo, UInt32 y, Byte start) {
+  UInt32    i;
+  UInt32    x;
+  UInt32    mask;
+  UInt32    ofs;
+  Graphics *gc;
+  gc = GetGraphics();
+  gc->ForegroundColor(0x0000, 0xf000, 0x0000);
+  gc->LineWidth(3);
+  ofs = 30;
+  mask = 0x20000;
+  for (x=0; x<18; x++) {
+    if ((hi & mask) != (lines[start] & mask)) {
+      if (hi & mask) {
+        gc->ForegroundColor(0x2000, 0x2000, 0x2000);
+        gc->DrawLine(ofs+x*4,y,ofs+x*4+4,y);
+        gc->ForegroundColor(0x0000, 0xf000, 0x0000);
+        gc->LineWidth(1);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4,y+2);
+        gc->DrawLine(ofs+x*4+3,y-14,ofs+x*4+3,y+2);
+        gc->LineWidth(3);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4+3,y-15);
+        }
+      else {
+        gc->ForegroundColor(0x2000, 0x2000, 0x2000);
+        gc->LineWidth(1);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4,y+2);
+        gc->DrawLine(ofs+x*4+3,y-14,ofs+x*4+3,y+2);
+        gc->LineWidth(3);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4+3,y-15);
+        gc->ForegroundColor(0x0000, 0xf000, 0x0000);
+        gc->DrawLine(ofs+x*4,y,ofs+x*4+4,y);
+        }
+      }
+    mask >>= 1;
+    }
+  lines[start] = hi;
+  ofs += 72;
+  mask = 0x20000;
+  for (x=0; x<18; x++) {
+    if ((lo & mask) != (lines[start+1] & mask)) {
+      if (lo & mask) {
+        gc->ForegroundColor(0x2000, 0x2000, 0x2000);
+        gc->DrawLine(ofs+x*4,y,ofs+x*4+4,y);
+        gc->ForegroundColor(0x0000, 0xf000, 0x0000);
+        gc->LineWidth(1);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4,y+2);
+        gc->DrawLine(ofs+x*4+3,y-14,ofs+x*4+3,y+2);
+        gc->LineWidth(3);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4+3,y-15);
+        }
+      else {
+        gc->ForegroundColor(0x2000, 0x2000, 0x2000);
+        gc->LineWidth(1);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4,y+2);
+        gc->DrawLine(ofs+x*4+3,y-14,ofs+x*4+3,y+2);
+        gc->LineWidth(3);
+        gc->DrawLine(ofs+x*4,y-15,ofs+x*4+3,y-15);
+        gc->ForegroundColor(0x0000, 0xf000, 0x0000);
+        gc->DrawLine(ofs+x*4,y,ofs+x*4+4,y);
+        }
+      }
+    mask >>= 1;
+    }
+  lines[start+1] = lo;
+  delete(gc);
+  }
+
 void Vdu::cycleStore() {
   UInt32    i;
   UInt32    x,y;
@@ -48,6 +116,50 @@ void Vdu::cycleStore() {
       lines[i] = tmp;
       }
     }
+  delete(gc);
+  }
+
+void Vdu::redrawSingle(UInt32 hi, UInt32 lo, UInt32 y, Byte start) {
+  UInt32    i;
+  UInt32    x;
+  UInt32    mask;
+  UInt32    ofs;
+  Graphics *gc;
+  gc = GetGraphics();
+  gc->ForegroundColor(0x0000, 0xf000, 0x0000);
+  gc->LineWidth(3);
+  ofs = 30;
+  mask = 0x20000;
+  for (x=0; x<18; x++) {
+    if (hi & mask) {
+      gc->LineWidth(1);
+      gc->DrawLine(ofs+x*4,y-15,ofs+x*4,y+2);
+      gc->DrawLine(ofs+x*4+3,y-14,ofs+x*4+3,y+2);
+      gc->LineWidth(3);
+      gc->DrawLine(ofs+x*4,y-15,ofs+x*4+3,y-15);
+      }
+    else {
+      gc->DrawLine(ofs+x*4,y,ofs+x*4+4,y);
+      }
+    mask >>= 1;
+    }
+  lines[start] = hi;
+  ofs += 72;
+  mask = 0x20000;
+  for (x=0; x<18; x++) {
+    if (lo & mask) {
+      gc->LineWidth(1);
+      gc->DrawLine(ofs+x*4,y-15,ofs+x*4,y+2);
+      gc->DrawLine(ofs+x*4+3,y-14,ofs+x*4+3,y+2);
+      gc->LineWidth(3);
+      gc->DrawLine(ofs+x*4,y-15,ofs+x*4+3,y-15);
+      }
+    else {
+      gc->DrawLine(ofs+x*4,y,ofs+x*4+4,y);
+      }
+    mask >>= 1;
+    }
+  lines[start+1] = lo;
   delete(gc);
   }
 
@@ -102,7 +214,9 @@ void Vdu::Redraw() {
   gc->FillEllipse(12,height-12,12,12);
   gc->FillEllipse(width-12,height-12,12,12);
   switch (mode) {
+    case    Scr: redrawSingle(cpu->Scr(), 0, 100, 0); break;
     case Memory: redrawStore(); break;
+    case  Order: redrawSingle(cpu->Order(), 0, 100, 0); break;
     }
   delete(gc);
   }
@@ -113,7 +227,9 @@ void Vdu::Tank(Byte t) {
 
 void Vdu::Cycle() {
   switch (mode) {
+    case    Scr: cycleSingle(cpu->Scr(), 0, 100, 0); break;
     case Memory: cycleStore(); break;
+    case  Order: cycleSingle(cpu->Order(), 0, 100, 0); break;
     }
   }
 

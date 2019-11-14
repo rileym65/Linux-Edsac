@@ -122,7 +122,7 @@ void MainWindow::InitializeComponent() {
 
   vdu3 = new Vdu(this, VDU3_X, VDU3_Y, VDU_W, VDU_H);
   vdu3->BackgroundColor(0x8000, 0x8000, 0x8000);
-  vdu3->Mode(Vdu::Csr);
+  vdu3->Mode(Vdu::Scr);
   vdu3->Visible(true);
   vdu3->BorderWidth(0);
   this->Add(vdu3);

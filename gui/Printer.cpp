@@ -98,6 +98,7 @@ void Printer::Print(Byte out) {
     if (out == 13) printf("\n");
     else if (out == 10) ;
     else printf("%c",out);
+    fflush(stdout);
     }
   }
 

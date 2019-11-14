@@ -203,6 +203,7 @@ void Vdu::Mode(Byte m) {
 
 void Vdu::Redraw() {
   Graphics *gc;
+  UInt32   *data;
   gc = GetGraphics();
   gc->ForegroundColor(Color::Black());
   gc->FillEllipse(0,0,width, height);
@@ -214,9 +215,20 @@ void Vdu::Redraw() {
   gc->FillEllipse(12,height-12,12,12);
   gc->FillEllipse(width-12,height-12,12,12);
   switch (mode) {
+    case Accumulator:
+         data = cpu->Acc();
+         redrawSingle(data[0],data[1], 85, 0);
+         redrawSingle(data[2],data[3], 115, 2);
+         break;
     case    Scr: redrawSingle(cpu->Scr(), 0, 100, 0); break;
     case Memory: redrawStore(); break;
     case  Order: redrawSingle(cpu->Order(), 0, 100, 0); break;
+    case Multiplier:
+         data = cpu->Multiplier();
+         redrawSingle(data[0],data[1], 85, 0);
+         data = cpu->Multiplicand();
+         redrawSingle(data[0],data[1], 115, 2);
+         break;
     }
   delete(gc);
   }
@@ -226,10 +238,22 @@ void Vdu::Tank(Byte t) {
   }
 
 void Vdu::Cycle() {
+  UInt32 *data;
   switch (mode) {
+    case Accumulator:
+         data = cpu->Acc();
+         cycleSingle(data[0],data[1], 85, 0);
+         cycleSingle(data[2],data[3], 115, 2);
+         break;
     case    Scr: cycleSingle(cpu->Scr(), 0, 100, 0); break;
     case Memory: cycleStore(); break;
     case  Order: cycleSingle(cpu->Order(), 0, 100, 0); break;
+    case Multiplier:
+         data = cpu->Multiplier();
+         cycleSingle(data[0],data[1], 85, 0);
+         data = cpu->Multiplicand();
+         cycleSingle(data[0],data[1], 115, 2);
+         break;
     }
   }
 

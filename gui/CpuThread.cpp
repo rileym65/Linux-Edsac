@@ -12,8 +12,11 @@ void CpuThread::execute(void* arg) {
   HrTimer timer;
   timer.Restart();
   while (!terminate) {
-    while (timer.Microseconds() < 1400) {
-      usleep(100);
+    if (cpu->StopCommand()) {
+      while (timer.Microseconds() < 10000) usleep(1000);
+      }
+    else {
+      while (timer.Microseconds() < 100) usleep(100);
       }
     timer.Restart();
     if (step && cpu->StopCommand()) cpu->StopCommand(false);
@@ -22,7 +25,6 @@ void CpuThread::execute(void* arg) {
       if (step) {
         step = false;
         cpu->StopCommand(true);
-printf("scr:%d\n",cpu->Scr());
         }
       }
     }

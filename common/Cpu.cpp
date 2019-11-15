@@ -160,8 +160,6 @@ Byte Cpu::getShiftCount(UInt32 a) {
   }
 
 void Cpu::lMul(UInt32 hi,UInt32 lo,char mode) {
-  Int32 i;
-  UInt32 c,t;
   multiplicand[1] = hi;
   multiplicand[0] = lo;
   doMul(mode);
@@ -247,8 +245,6 @@ void Cpu::rShift(UInt32* number,UInt32 num) {
   }
 
 void Cpu::sMul(UInt32 a,char mode) {
-  int i;
-  UInt32 tmp[2];
   multiplicand[0] = a;
   multiplicand[1] = 0;
   doMul(mode);
@@ -262,9 +258,9 @@ void Cpu::sMul(UInt32 a,char mode) {
 /* ********************************************************* */
 void Cpu::twosComp(UInt32* number,UInt32 num) {
   Int32 i;
-  for (i=0; i<num; i++) number[i] = (~number[i] & 0x3ffff);
+  for (i=0; i<(Int32)num; i++) number[i] = (~number[i] & 0x3ffff);
   number[num-1]++;
-  for (i=num-2; i>= 0; i--) {
+  for (i=(Int32)num-2; i>= 0; i--) {
     if (number[i+1] & 0x40000) {
       number[i]++;
       number[i+1] &= 0x3ffff;
@@ -456,7 +452,6 @@ void Cpu::Start() {
 
 void Cpu::Step() {
   Int32  i;
-  UInt32 c;
   Byte   b;
   UInt32 address;
   UInt32 tmp[2];
@@ -896,7 +891,7 @@ void Cpu::Step() {
     case 17:                                     /* F - Unconditional jump */
          if (!only1949) {
            if (order & 1) {
-             if (acc[0] | acc[1] | acc[2] | acc[3] != 0) {
+             if ((acc[0] | acc[1] | acc[2] | acc[3]) != 0) {
                if (trace == 'Y') {
                  sprintf(buffer2,"Acc not zero, Jumping %d\r\n",address);
                  strcat(buffer1, buffer2);

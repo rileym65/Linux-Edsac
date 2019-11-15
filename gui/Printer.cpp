@@ -90,7 +90,6 @@ Byte Printer::Translate(Byte in) {
   }
 
 void Printer::Print(Byte out) {
-  UInt32 i;
   out = Translate(out);
   if (out == 200) shiftMode = false;
   else if (out == 201) shiftMode = true;

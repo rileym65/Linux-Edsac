@@ -1,7 +1,7 @@
 PROJECT = edsac
 CC = g++
 LINK = g++
-DEFS = -pthread -std=c++11
+DEFS = -pthread -std=c++11 -Wall
 LIBDIR =
 LIBS = -lSmrFramework -lSmrAppFramework -lX11 -lXft
 INCDIR = -I. -I../common/ -I/usr/include/freetype2
@@ -9,6 +9,7 @@ INCS =
 OBJS = \
 	../common/Cpu.o \
 	CpuThread.o \
+	Dial.o \
 	MainWindow.o \
 	MainWindow_init.o \
 	../common/Reader.o \
@@ -34,6 +35,7 @@ clean:
 	-rm ../common/*.o
 
 CpuThread.o:           header.h CpuThread.h CpuThread.cpp
+Dial.o:                header.h Dial.h Dial.cpp
 Main.o:                header.h MainWindow.h Main.cpp
 MainWindow.o:          header.h MainWindow.h MainWindow.cpp
 MainWindow_init.o:     header.h MainWindow.h MainWindow_init.cpp

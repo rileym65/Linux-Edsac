@@ -3,17 +3,17 @@
 
 #define SW_W       35
 #define SW_H       35
-#define CLEAR_X   100
+#define CLEAR_X   250
 #define CLEAR_Y   650
-#define START_X   200
+#define START_X   325
 #define START_Y   650
-#define STOP_X    300
+#define STOP_X    400
 #define STOP_Y    650
-#define RESET_X   400
+#define RESET_X   475
 #define RESET_Y   650
-#define STEP_X    500
+#define STEP_X    550
 #define STEP_Y    650
-#define STOPL_X   600
+#define STOPL_X   625
 #define STOPL_Y   650
 #define VDU1_X     25
 #define VDU1_Y     25
@@ -29,6 +29,10 @@
 #define VDU6_Y    275
 #define VDU_W     200
 #define VDU_H     200
+#define DIAL_X     25
+#define DIAL_Y    500
+#define DIAL_W    200
+#define DIAL_H    200
 
 void MainWindow::InitializeComponent() {
   Label *label;
@@ -178,6 +182,14 @@ void MainWindow::InitializeComponent() {
   label->ForegroundColor(Color::Black());
   this->Add(label);
 
+  dial = new Dial(this, DIAL_X, DIAL_Y, DIAL_W, DIAL_H);
+  dial->BackgroundColor(0x8000, 0x8000, 0x8000);
+  dial->ForegroundColor(0x1000, 0x1000, 0x1000);
+  dial->OnDial(new EventHandler(MainWindow::_dialEvent, this));
+  dial->Visible(true);
+  dial->BorderWidth(0);
+  this->Add(dial);
+
   timer = new Timer();
   timer->OnTick(new EventHandler(MainWindow::_TimerTick, this));
   timer->Interval(1);
@@ -207,5 +219,9 @@ void MainWindow::_stopButtonPressed(void* obj, void* sender, EventArgs args) {
 
 void MainWindow::_TimerTick(void* obj, void* sender, EventArgs args) {
   ((MainWindow*)obj)->TimerTick(sender);
+  }
+
+void MainWindow::_dialEvent(void* obj, void* sender, EventArgs args) {
+  ((MainWindow*)obj)->dialEvent(sender, (ValueEventArgs&)args);
   }
 

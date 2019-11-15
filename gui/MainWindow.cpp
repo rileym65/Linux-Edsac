@@ -46,3 +46,11 @@ void MainWindow::TimerTick(void* sender) {
   timer->Start();
   }
 
+void MainWindow::dialEvent(void* sender, ValueEventArgs args) {
+  UInt32  number;
+  number = args.Value();
+  if (number == 0) number = 10;
+  cpu->Acc()[0] = number << 1;
+  cpu->StopCommand(false);
+  }
+

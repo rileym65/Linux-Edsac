@@ -82,6 +82,7 @@ UInt32 orders2[] = {
   };
 
 Cpu::Cpu() {
+  stopCommand = true;
   printer = NULL;
   reader = NULL;
   trace = 'N';
@@ -431,6 +432,7 @@ void Cpu::Reset() {
   breg = 0;
   cycles[0] = 0;
   cycles[1] = 0;
+  stopCommand = true;
   }
 
 UInt32 Cpu::Scr() {
@@ -462,6 +464,7 @@ void Cpu::Step() {
   char    buffer1[128];
   char    buffer2[128];
   Boolean indexed;
+  if (stopCommand) return;
   cycles[0]++;
   if (cycles[0] == 0x40000) {
     cycles[0] = 0;

@@ -1,4 +1,4 @@
-  Add phone dial input
+* Add phone dial input
 
   Add simulated printer
 

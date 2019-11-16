@@ -54,3 +54,9 @@ void MainWindow::dialEvent(void* sender, ValueEventArgs args) {
   cpu->StopCommand(false);
   }
 
+void MainWindow::tankEvent(void* sender, ValueEventArgs args) {
+  UInt32  number;
+  number = args.Value();
+  vdu2->Tank(number);
+  }
+

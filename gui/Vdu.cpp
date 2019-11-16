@@ -331,6 +331,7 @@ void Vdu::Redraw() {
 
 void Vdu::Tank(Byte t) {
   tank = t;
+  Redraw();
   }
 
 void Vdu::Cycle() {

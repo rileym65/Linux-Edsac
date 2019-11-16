@@ -14,6 +14,7 @@ OBJS = \
 	MainWindow_init.o \
 	../common/Reader.o \
 	Printer.o \
+	RotaryKnob.o \
 	Vdu.o \
 	Main.o
 
@@ -40,5 +41,6 @@ Main.o:                header.h MainWindow.h Main.cpp
 MainWindow.o:          header.h MainWindow.h MainWindow.cpp
 MainWindow_init.o:     header.h MainWindow.h MainWindow_init.cpp
 Printer.o:             header.h Printer.cpp
+RotaryKnob.o:          header.h RotaryKnob.h RotaryKnob.cpp
 Vdu.o:                 header.h Vdu.h Vdu.cpp
 

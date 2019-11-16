@@ -33,6 +33,10 @@
 #define DIAL_Y    500
 #define DIAL_W    200
 #define DIAL_H    200
+#define TANK_X    500
+#define TANK_Y    150
+#define TANK_W     50
+#define TANK_H     50
 
 void MainWindow::InitializeComponent() {
   Label *label;
@@ -196,6 +200,13 @@ void MainWindow::InitializeComponent() {
   dial->BorderWidth(0);
   this->Add(dial);
 
+  tankSelect = new RotaryKnob(this, TANK_X, TANK_Y, TANK_W, TANK_H);
+  tankSelect->BackgroundColor(0x8000, 0x8000, 0x8000);
+  tankSelect->Visible(true);
+  tankSelect->BorderWidth(0);
+  tankSelect->OnTurn(new EventHandler(MainWindow::_tankEvent, this));
+  this->Add(tankSelect);
+
   timer = new Timer();
   timer->OnTick(new EventHandler(MainWindow::_TimerTick, this));
   timer->Interval(1);
@@ -229,5 +240,9 @@ void MainWindow::_TimerTick(void* obj, void* sender, EventArgs args) {
 
 void MainWindow::_dialEvent(void* obj, void* sender, EventArgs args) {
   ((MainWindow*)obj)->dialEvent(sender, (ValueEventArgs&)args);
+  }
+
+void MainWindow::_tankEvent(void* obj, void* sender, EventArgs args) {
+  ((MainWindow*)obj)->tankEvent(sender, (ValueEventArgs&)args);
   }
 

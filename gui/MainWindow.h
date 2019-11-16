@@ -24,6 +24,9 @@ class MainWindow : public Form {
     Vdu        *vdu4;
     Vdu        *vdu5;
     Vdu        *vdu6;
+    Panel      *vduPanel1;
+    Panel      *vduPanel2;
+    Panel      *controlPanel;
     Dial       *dial;
     Timer      *timer;
     RotaryKnob *tankSelect;

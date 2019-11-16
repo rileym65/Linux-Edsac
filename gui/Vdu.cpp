@@ -5,13 +5,13 @@ Vdu::Vdu(Control* parent, int x, int y, int w, int h) : Control(parent, x, y, w,
   UInt32 i;
   tank = 0;
   for (i=0; i<32; i++) lines[i] = 0xac75;
+  showGrid = false;
   }
 
 Vdu::~Vdu() {
   }
 
 void Vdu::cycleSingle(UInt32 hi, UInt32 lo, UInt32 y, Byte start) {
-  UInt32    i;
   UInt32    x;
   UInt32    mask;
   UInt32    ofs;
@@ -120,7 +120,6 @@ void Vdu::cycleStore() {
   }
 
 void Vdu::redrawSingle(UInt32 hi, UInt32 lo, UInt32 y, Byte start) {
-  UInt32    i;
   UInt32    x;
   UInt32    mask;
   UInt32    ofs;
@@ -202,6 +201,8 @@ void Vdu::Mode(Byte m) {
   }
 
 void Vdu::Redraw() {
+  UInt32 i;
+  UInt32 y;
   Graphics *gc;
   UInt32   *data;
   gc = GetGraphics();
@@ -234,6 +235,97 @@ void Vdu::Redraw() {
          redrawSingle(data[0],data[1], 115, 2);
          break;
     }
+  if (showGrid) {
+    gc->ForegroundColor(0x9000, 0x9000, 0x9000);
+    gc->LineWidth(1);
+    switch (mode) {
+      case Memory:
+           gc->DrawLine(100,30,100,50);
+           gc->DrawLine(100,150,100,170);
+           gc->DrawLine(13,100,28,100);
+           gc->DrawLine(172,100,187,100);
+           break;
+      case Accumulator:
+           for (i=0; i<36; i++) {
+             if (i == 0 || i == 1 || i == 13 || i == 9 || i == 5 ||
+                 i == 31 || i == 27 || i == 23 || i == 19)
+               y = 46;
+             else y = 54;
+             if (i == 17) y = 40;
+             gc->DrawLine(34+i*4,y,34+i*4,65);
+             }
+           for (i=0; i<36; i++) {
+             if (i == 1 || i == 13 || i == 9 || i == 5 ||
+                 i == 31 || i == 27 || i == 23 || i == 19)
+               y = 119;
+             else y = 111;
+             if (i == 17) y = 125;
+             gc->DrawLine(34+i*4,15+104,34+i*4,15+y);
+             }
+           gc->DrawLine(30,119,30,126);
+           break;
+      case Multiplier:
+           for (i=0; i<36; i++) {
+             if (i == 0 || i == 1 || i == 13 || i == 9 || i == 5 ||
+                 i == 31 || i == 27 || i == 23 || i == 19)
+               y = 46;
+             else y = 54;
+             if (i == 17) y = 40;
+             gc->DrawLine(34+i*4,y,34+i*4,65);
+             }
+           for (i=0; i<36; i++) {
+             if (i == 0 || i == 1 || i == 13 || i == 9 || i == 5 ||
+                 i == 31 || i == 27 || i == 23 || i == 19)
+               y = 119;
+             else y = 111;
+             if (i == 17) y = 125;
+             gc->DrawLine(34+i*4,15+104,34+i*4,15+y);
+             }
+           break;
+      case Counter:
+           for (i=0; i<36; i++) {
+             if (i == 0 || i == 4 || i == 7 || i == 11 || i == 15 ||
+                 i == 31 || i == 27 || i == 23 || i == 19)
+               y = 119;
+             else y = 111;
+             gc->DrawLine(34+i*4,104,34+i*4,y);
+             }
+           break;
+      case Order:
+           gc->DrawLine(102, 104, 102, 119);
+           gc->DrawLine( 98, 104,  98, 119);
+           gc->DrawLine( 94, 104,  94, 111);
+           gc->DrawLine( 90, 104,  90, 111);
+           gc->DrawLine( 86, 104,  86, 111);
+           gc->DrawLine( 82, 104,  82, 111);
+           gc->DrawLine( 78, 104,  78, 111);
+           gc->DrawLine( 74, 104,  74, 111);
+           gc->DrawLine( 70, 104,  70, 111);
+           gc->DrawLine( 66, 104,  66, 111);
+           gc->DrawLine( 62, 104,  62, 111);
+           gc->DrawLine( 58, 104,  58, 119);
+           gc->DrawLine( 54, 104,  54, 119);
+           gc->DrawLine( 50, 104,  50, 111);
+           gc->DrawLine( 46, 104,  46, 111);
+           gc->DrawLine( 42, 104,  42, 111);
+           gc->DrawLine( 38, 104,  38, 111);
+           gc->DrawLine( 34, 104,  34, 119);
+           break;
+      case Scr:
+           gc->DrawLine(102, 104, 102, 119);
+           gc->DrawLine( 98, 104,  98, 111);
+           gc->DrawLine( 94, 104,  94, 111);
+           gc->DrawLine( 90, 104,  90, 111);
+           gc->DrawLine( 86, 104,  86, 119);
+           gc->DrawLine( 82, 104,  82, 111);
+           gc->DrawLine( 78, 104,  78, 111);
+           gc->DrawLine( 74, 104,  74, 111);
+           gc->DrawLine( 70, 104,  70, 119);
+           gc->DrawLine( 66, 104,  66, 111);
+           gc->DrawLine( 62, 104,  62, 119);
+           break;
+      }
+    }
   delete(gc);
   }
 
@@ -263,5 +355,9 @@ void Vdu::Cycle() {
          cycleSingle(data[0],data[1], 115, 2);
          break;
     }
+  }
+
+void Vdu::ShowGrid(Boolean b) {
+  showGrid = b;
   }
 

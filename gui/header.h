@@ -34,6 +34,7 @@ LINK Image       *stopOff;
 LINK Image       *stopOn;
 LINK Image       *pushOn;
 LINK Image       *pushOff;
+LINK Boolean      showGridLines;
 
 
 #endif

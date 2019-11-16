@@ -115,6 +115,7 @@ void MainWindow::InitializeComponent() {
   vdu1->Mode(Vdu::Counter);
   vdu1->Visible(true);
   vdu1->BorderWidth(0);
+  vdu1->ShowGrid(showGridLines);
   this->Add(vdu1);
 
   vdu2 = new Vdu(this, VDU2_X, VDU2_Y, VDU_W, VDU_H);
@@ -122,6 +123,7 @@ void MainWindow::InitializeComponent() {
   vdu2->Mode(Vdu::Memory);
   vdu2->Visible(true);
   vdu2->BorderWidth(0);
+  vdu2->ShowGrid(showGridLines);
   this->Add(vdu2);
 
   vdu3 = new Vdu(this, VDU3_X, VDU3_Y, VDU_W, VDU_H);
@@ -129,6 +131,7 @@ void MainWindow::InitializeComponent() {
   vdu3->Mode(Vdu::Scr);
   vdu3->Visible(true);
   vdu3->BorderWidth(0);
+  vdu3->ShowGrid(showGridLines);
   this->Add(vdu3);
 
   vdu4 = new Vdu(this, VDU4_X, VDU4_Y, VDU_W, VDU_H);
@@ -136,6 +139,7 @@ void MainWindow::InitializeComponent() {
   vdu4->Mode(Vdu::Order);
   vdu4->Visible(true);
   vdu4->BorderWidth(0);
+  vdu4->ShowGrid(showGridLines);
   this->Add(vdu4);
 
   vdu5 = new Vdu(this, VDU5_X, VDU5_Y, VDU_W, VDU_H);
@@ -143,6 +147,7 @@ void MainWindow::InitializeComponent() {
   vdu5->Mode(Vdu::Accumulator);
   vdu5->Visible(true);
   vdu5->BorderWidth(0);
+  vdu5->ShowGrid(showGridLines);
   this->Add(vdu5);
 
   vdu6 = new Vdu(this, VDU6_X, VDU6_Y, VDU_W, VDU_H);
@@ -150,6 +155,7 @@ void MainWindow::InitializeComponent() {
   vdu6->Mode(Vdu::Multiplier);
   vdu6->Visible(true);
   vdu6->BorderWidth(0);
+  vdu6->ShowGrid(showGridLines);
   this->Add(vdu6);
 
   label = new Label(this, VDU1_X, VDU1_Y-25, VDU_W, 25, "Counter");

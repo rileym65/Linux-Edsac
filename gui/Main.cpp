@@ -5,7 +5,7 @@
 #include "images.h"
 
 int main(int argc, char** argv) {
-  UInt32  i;
+  Int32  i;
   char   tapeFilename[1024];
 
   cpu = new Cpu();
@@ -13,10 +13,12 @@ int main(int argc, char** argv) {
   printer = new Printer();
   cpu->AttachReader(reader);
   cpu->AttachPrinter(printer);
+  showGridLines = false;
 
   for (i=1; i<argc; i++) {
     if (strcmp(argv[i],"-1") == 0) initialOrders = 1;
     if (strcmp(argv[i],"-2") == 0) initialOrders = 2;
+    if (strcmp(argv[i],"-g") == 0) showGridLines = true;
     if (strcmp(argv[i],"-t") == 0) cpu->Trace('Y');
     if (strcmp(argv[i],"-1949") == 0) cpu->Only1949(true);
     if (argv[i][0] != '-') {
@@ -48,7 +50,7 @@ int main(int argc, char** argv) {
   pushOn = new Image(new MemoryStream(push_on, push_on_length));
   pushOff = new Image(new MemoryStream(push_off, push_off_length));
 
-  window = new MainWindow(1000, 700);
+  window = new MainWindow(1200, 720);
   window->BorderWidth(5);
   window->BackgroundColor(0x8000, 0x8000, 0x8000);
   window->Text("EDSAC");

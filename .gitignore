@@ -3,3 +3,11 @@ edsac
 programs/
 projects/
 Resources/
+gui/*.1
+gui/*.2
+text/*.1
+text/*.2
+console/*.1
+console/*.2
+Documentation/*.1
+Documentation/*.2

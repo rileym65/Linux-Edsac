@@ -35,6 +35,7 @@ LINK Image       *stopOn;
 LINK Image       *pushOn;
 LINK Image       *pushOff;
 LINK Boolean      showGridLines;
+LINK UInt32       speed;
 
 
 #endif

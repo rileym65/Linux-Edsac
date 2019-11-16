@@ -14,11 +14,14 @@ int main(int argc, char** argv) {
   cpu->AttachReader(reader);
   cpu->AttachPrinter(printer);
   showGridLines = false;
+  speed = 100;
 
   for (i=1; i<argc; i++) {
     if (strcmp(argv[i],"-1") == 0) initialOrders = 1;
     if (strcmp(argv[i],"-2") == 0) initialOrders = 2;
     if (strcmp(argv[i],"-g") == 0) showGridLines = true;
+    if (strcmp(argv[i],"-a") == 0) speed = 1222;
+    if (strcmp(argv[i],"-f") == 0) speed = 0;
     if (strcmp(argv[i],"-t") == 0) cpu->Trace('Y');
     if (strcmp(argv[i],"-1949") == 0) cpu->Only1949(true);
     if (argv[i][0] != '-') {
@@ -62,6 +65,7 @@ int main(int argc, char** argv) {
     else cpu->LoadOrders2();
   cpu->StopCommand(true);
   cpuThread = new CpuThread(cpu);
+  cpuThread->Speed(speed);
   cpuThread->Start(NULL);
 
   try {

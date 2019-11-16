@@ -16,7 +16,7 @@ void CpuThread::execute(void* arg) {
       while (timer.Microseconds() < 10000) usleep(1000);
       }
     else {
-      while (timer.Microseconds() < 100) usleep(100);
+      while (timer.Microseconds() < speed) usleep(100);
       }
     timer.Restart();
     if (step && cpu->StopCommand()) cpu->StopCommand(false);
@@ -28,6 +28,10 @@ void CpuThread::execute(void* arg) {
         }
       }
     }
+  }
+
+void CpuThread::Speed(UInt32 i) {
+  speed = i;
   }
 
 void CpuThread::Step() {

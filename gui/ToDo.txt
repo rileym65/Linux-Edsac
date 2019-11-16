@@ -12,5 +12,5 @@
 
 * Add index lines to register VDUs to make it easier to read values
 
-  Add throttle control so that emulator can run anywhere from 
+* Add throttle control so that emulator can run anywhere from 
     authentic speed up to the fastest possible

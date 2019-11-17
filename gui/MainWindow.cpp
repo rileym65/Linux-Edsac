@@ -43,6 +43,7 @@ void MainWindow::TimerTick(void* sender) {
   vdu4->Cycle();
   vdu5->Cycle();
   vdu6->Cycle();
+  ptr->Cycle();
   timer->Start();
   }
 

@@ -228,6 +228,13 @@ void MainWindow::InitializeComponent() {
   tankSelect->OnTurn(new EventHandler(MainWindow::_tankEvent, this));
   vduPanel1->Add(tankSelect);
 
+  telePrinter = new TelePrinter(this, 835, 0, width-835, 488);
+  telePrinter->BackgroundColor(0xe000, 0xe000, 0xe000);
+  telePrinter->Visible(true);
+  telePrinter->BorderWidth(1);
+  this->Add(telePrinter);
+  ptr = telePrinter;
+
   timer = new Timer();
   timer->OnTick(new EventHandler(MainWindow::_TimerTick, this));
   timer->Interval(1);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "header.h"
 #include "Printer.h"
 
 Printer::Printer() {
@@ -94,10 +95,7 @@ void Printer::Print(Byte out) {
   if (out == 200) shiftMode = false;
   else if (out == 201) shiftMode = true;
   else {
-    if (out == 13) printf("\n");
-    else if (out == 10) ;
-    else printf("%c",out);
-    fflush(stdout);
+    ptr->Print(out);
     }
   }
 

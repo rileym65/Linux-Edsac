@@ -6,30 +6,32 @@
 #include "Vdu.h"
 #include "Dial.h"
 #include "RotaryKnob.h"
+#include "TelePrinter.h"
 
 using namespace SmrFramework;
 
 class MainWindow : public Form {
   protected:
-    Boolean     stopped;
-    Button     *clearButton;
-    Button     *resetButton;
-    Button     *startButton;
-    Button     *stepButton;
-    Button     *stopButton;
-    Control    *stopLamp;
-    Vdu        *vdu1;
-    Vdu        *vdu2;
-    Vdu        *vdu3;
-    Vdu        *vdu4;
-    Vdu        *vdu5;
-    Vdu        *vdu6;
-    Panel      *vduPanel1;
-    Panel      *vduPanel2;
-    Panel      *controlPanel;
-    Dial       *dial;
-    Timer      *timer;
-    RotaryKnob *tankSelect;
+    Boolean      stopped;
+    Button      *clearButton;
+    Button      *resetButton;
+    Button      *startButton;
+    Button      *stepButton;
+    Button      *stopButton;
+    Control     *stopLamp;
+    Vdu         *vdu1;
+    Vdu         *vdu2;
+    Vdu         *vdu3;
+    Vdu         *vdu4;
+    Vdu         *vdu5;
+    Vdu         *vdu6;
+    Panel       *vduPanel1;
+    Panel       *vduPanel2;
+    Panel       *controlPanel;
+    Dial        *dial;
+    Timer       *timer;
+    RotaryKnob  *tankSelect;
+    TelePrinter *telePrinter;
     void InitializeComponent();
     void clearButtonPressed(void* sender, MouseEventArgs args);
     void resetButtonPressed(void* sender, MouseEventArgs args);

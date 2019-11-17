@@ -235,6 +235,33 @@ void MainWindow::InitializeComponent() {
   this->Add(telePrinter);
   ptr = telePrinter;
 
+  emulatorPanel = new Panel(this, 835, 490, width-835, height-490);
+  emulatorPanel->BackgroundColor(Color::White());
+  emulatorPanel->Visible(true);
+  emulatorPanel->BorderWidth(1);
+  emulatorPanel->BorderColor(Color::Black());
+  this->Add(emulatorPanel);
+
+  initialOrders = new DropDownList(emulatorPanel, 110, 50, 150, 30);
+  initialOrders->MaxVisibleItems(2);
+  initialOrders->Add(new String("Initial Orders 1"));
+  initialOrders->Add(new String("Initial Orders 2"));
+  initialOrders->SelectedIndex(0);
+  initialOrders->BackgroundColor(0xc000, 0xc000, 0xc000);
+  initialOrders->ForegroundColor(Color::Black());
+  initialOrders->OnValueChanged(new EventHandler(MainWindow::_ordersChanged, this));
+  initialOrders->Visible(true);
+  emulatorPanel->Add(initialOrders);
+
+  mountTape = new Button(emulatorPanel, 110, 135, 150, 30);
+  mountTape->Text("Mount Tape");
+  mountTape->BorderWidth(0);
+  mountTape->BackgroundColor(0xc000, 0xc000, 0xc000);
+  mountTape->ForegroundColor(Color::Black());
+  mountTape->OnRelease(new EventHandler(MainWindow::_tapeButtonPressed, controlPanel));
+  mountTape->Visible(true);
+  emulatorPanel->Add(mountTape);
+
   timer = new Timer();
   timer->OnTick(new EventHandler(MainWindow::_TimerTick, this));
   timer->Interval(1);
@@ -272,5 +299,13 @@ void MainWindow::_dialEvent(void* obj, void* sender, EventArgs args) {
 
 void MainWindow::_tankEvent(void* obj, void* sender, EventArgs args) {
   ((MainWindow*)obj)->tankEvent(sender, (ValueEventArgs&)args);
+  }
+
+void MainWindow::_ordersChanged(void* obj, void* sender, EventArgs args) {
+  ((MainWindow*)obj)->ordersChanged(sender, (ValueEventArgs&)args);
+  }
+
+void MainWindow::_tapeButtonPressed(void* obj, void* sender, EventArgs args) {
+  ((MainWindow*)obj)->tapeButtonPressed(sender, (MouseEventArgs&)args);
   }
 

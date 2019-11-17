@@ -31,7 +31,6 @@ int main(int argc, char** argv) {
       }
     }
 
-  printf("Initial Orders: %d\n",initialOrders);
   if (strlen(tapeFilename) > 0) {
     if (!reader->Mount(tapeFilename)) {
       printf("Could not open tape file: %s\n",tapeFilename);
@@ -63,6 +62,7 @@ int main(int argc, char** argv) {
   cpu->Reset();
   if (initialOrders == 1) cpu->LoadOrders1();
     else cpu->LoadOrders2();
+  window->InitialOrders(initialOrders);
   cpu->StopCommand(true);
   cpuThread = new CpuThread(cpu);
   cpuThread->Speed(speed);

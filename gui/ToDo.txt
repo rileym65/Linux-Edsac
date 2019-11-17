@@ -2,7 +2,7 @@
 
 * Add simulated printer
 
-  Add a method from the GUI to load a new tape
+* Add a method from the GUI to load a new tape
 
   Add debugger/trace capability
 

@@ -737,6 +737,7 @@ void Cpu::Step() {
 
     case  3:                                     /* E - Branch positive */
          if ((acc[0] & 0x10000) == 0) {
+           if (!only1949 && indexed) address = (address + breg) & 0x3ff;
            if (trace == 'Y') {
              sprintf(buffer2,"Positive, jumping %d\r\n",address);
              strcat(buffer1, buffer2);
@@ -759,6 +760,7 @@ void Cpu::Step() {
 
     case 27:                                     /* G - Branch negative */
          if ((acc[0] & 0x10000) != 0) {
+           if (!only1949 && indexed) address = (address + breg) & 0x3ff;
            if (trace == 'Y') {
              sprintf(buffer2,"Negative, jumping %d\r\n",address);
              strcat(buffer1, buffer2);
@@ -891,6 +893,7 @@ void Cpu::Step() {
 
     case 17:                                     /* F - Unconditional jump */
          if (!only1949) {
+           if (indexed) address = (address + breg) & 0x3ff;
            if (order & 1) {
              if ((acc[0] | acc[1] | acc[2] | acc[3]) != 0) {
                if (trace == 'Y') {

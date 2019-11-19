@@ -20,6 +20,7 @@ class TelePrinter : public Control {
     virtual void Cycle();
     virtual void Redraw();
     virtual void Print(Byte out);
+    virtual void Print(const char* message);
   };
 
 #endif

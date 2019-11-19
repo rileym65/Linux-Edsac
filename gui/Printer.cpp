@@ -99,44 +99,6 @@ void Printer::Print(Byte out) {
     }
   }
 
-//void Printer::Print(Byte out) {
-//  UInt32 i;
-//  out = Translate(out);
-//  if (out == 200) shiftMode = false;
-//  else if (out == 201) shiftMode = true;
-//  else {
-//    if (out == 13) {
-//      if (printerLine < 15) {
-//        printerLine++;
-//        }
-//      else {
-//        for (i=0; i<15; i++) {
-//          strcpy(printer[i], printer[i+1]);
-////          GotoXY(40, i+1);
-//          printf("%s",printer[i]);
-//          }
-//        strcpy(printer[15], "                                        ");
-////        GotoXY(40, 16);
-//        printf("%s",printer[15]);
-//        }
-//      printerPos = 0;
-//      fflush(stdout);
-//      }
-//    else if (out == 10) {
-//      printerPos = 0;
-//      }
-//    else {
-//      if (printerPos < 40) {
-//        printer[printerLine][printerPos] = out;
-//        printerPos++;
-////        GotoXY(40, printerLine+1);
-//        printf("%s",printer[printerLine]);
-//        fflush(stdout);
-//        }
-//      }
-//    }
-//  }
-
 Boolean Printer::ShiftMode() {
   return shiftMode;
   }
@@ -147,38 +109,5 @@ Boolean Printer::ShiftMode(Boolean b) {
   }
 
 void Printer::Print(const char* message) {
-  UInt32 i,j;
-  Byte   out;
-  for (j=0; j<strlen(message); j++) {
-    out = message[j];
-    if (out == 13) {
-      if (printerLine < 15) {
-        printerLine++;
-        }
-      else {
-        for (i=0; i<15; i++) {
-          strcpy(printer[i], printer[i+1]);
-//          GotoXY(40, i+1);
-          printf("%s",printer[i]);
-          }
-        strcpy(printer[15], "                                        ");
-//        GotoXY(40, 16);
-        printf("%s",printer[15]);
-        }
-      printerPos = 0;
-      fflush(stdout);
-      }
-    else if (out == 10) {
-      printerPos = 0;
-      }
-    else {
-      if (printerPos < 40) {
-        printer[printerLine][printerPos] = out;
-        printerPos++;
-//        GotoXY(40, printerLine+1);
-        printf("%s",printer[printerLine]);
-        fflush(stdout);
-        }
-      }
-    }
+  ptr->Print(message);
   }

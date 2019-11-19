@@ -935,21 +935,37 @@ void Cpu::Step() {
            if (order & 0x800) {
              if (order & 1) {
                breg -= address;
-               if (trace == 'Y') printf("b+=%x = %x",address,breg);
+               if (trace == 'Y') {
+                 sprintf(buffer2,"b-=%d = %d\r\n",address,breg);
+                 strcat(buffer1, buffer2);
+                 printer->Print(buffer1);
+                 }
                }
              else {
                breg += address;
-               if (trace == 'Y') printf("b+=%x = %x",address,breg);
+               if (trace == 'Y') {
+                 sprintf(buffer2,"b+=%d = %d\r\n",address,breg);
+                 strcat(buffer1, buffer2);
+                 printer->Print(buffer1);
+                 }
                }
              }
            else {
              if (order & 1) {
                breg = -address;
-               if (trace == 'Y') printf("b=%x",breg);
+               if (trace == 'Y') {
+                 sprintf(buffer2,"b=%d\r\n",breg);
+                 strcat(buffer1, buffer2);
+                 printer->Print(buffer1);
+                 }
                }
              else {
                breg = address;
-               if (trace == 'Y') printf("b=%x",breg);
+               if (trace == 'Y') {
+                 sprintf(buffer2,"b=%d\r\n",breg);
+                 strcat(buffer1, buffer2);
+                 printer->Print(buffer1);
+                 }
                }
              }
            }
@@ -977,6 +993,10 @@ void Cpu::Step() {
            inst = 29 << 12;
            inst |= ((breg & 0x3ff) << 1);
            mem[address] = inst;
+           if (trace == 'Y') {
+             strcat(buffer1,"\r\n");
+             printer->Print(buffer1);
+             }
            }
          else {
            printf("Bad instruction\n");

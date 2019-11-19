@@ -22,8 +22,8 @@ void TelePrinter::Redraw() {
   gc = GetGraphics();
   if (lineChanged) {
     lineChanged = false;
-    gc->Clear();
     }
+  gc->Clear();
   for (i=0; i<20; i++)
     gc->DrawText(20,20+i*20,printer[i]);
   delete(gc);
@@ -59,6 +59,13 @@ void TelePrinter::Cycle() {
   if (lineChanged || posChanged) {
     posChanged = false;
     Redraw();
+    }
+  }
+
+void TelePrinter::Print(const char* message) {
+  while (*message != 0) {
+    Print(*message);
+    message++;
     }
   }
 

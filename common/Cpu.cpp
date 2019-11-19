@@ -455,6 +455,7 @@ void Cpu::Step() {
   Byte   b;
   UInt32 address;
   UInt32 tmp[2];
+  UInt32  inst;
   String *line;
   char    buffer1[128];
   char    buffer2[128];
@@ -961,6 +962,18 @@ void Cpu::Step() {
              scr = address;
              if (trace == 'Y') printf("Jumping --> %d",address);
              }
+           }
+         else {
+           printf("Bad instruction\n");
+           stopCommand = true;
+           }
+         break;
+
+    case 14:                                     /* K - place B */
+         if (!only1949) {
+           inst = 29 << 12;
+           inst |= ((breg & 0x3ff) << 1);
+           mem[address] = inst;
            }
          else {
            printf("Bad instruction\n");

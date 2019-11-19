@@ -64,7 +64,13 @@ void MainWindow::tankEvent(void* sender, ValueEventArgs args) {
 void MainWindow::ordersChanged(void* sender, ValueEventArgs args) {
   UInt32 number;
   number = args.Value();
-printf("orders: %d\n",number);
+  if (number == 1) initialOrders->SelectedIndex(0);
+  if (number == 2) initialOrders->SelectedIndex(1);
+  }
+
+void MainWindow::traceChanged(void* sender, ValueEventArgs args) {
+  if (trace->Checked()) cpu->Trace('Y');
+    else cpu->Trace('N');
   }
 
 Int32 MainWindow::InitialOrders() {
@@ -101,6 +107,6 @@ void MainWindow::tapeButtonPressed(void* sender, MouseEventArgs args) {
       }
     }
   delete(dialog);
-//  if (initialOrders != 0) InitialOrders(initialOrders);
+  if (initialOrders != 0) InitialOrders(initialOrders);
   }
 

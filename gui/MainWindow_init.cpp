@@ -258,9 +258,18 @@ void MainWindow::InitializeComponent() {
   mountTape->BorderWidth(0);
   mountTape->BackgroundColor(0xc000, 0xc000, 0xc000);
   mountTape->ForegroundColor(Color::Black());
-  mountTape->OnRelease(new EventHandler(MainWindow::_tapeButtonPressed, controlPanel));
+  mountTape->OnRelease(new EventHandler(MainWindow::_tapeButtonPressed, this));
   mountTape->Visible(true);
   emulatorPanel->Add(mountTape);
+
+  trace = new CheckBox(emulatorPanel, 110, 170, 150, 30);
+  trace->Text("Trace");
+  trace->Checked(false);
+  trace->BackgroundColor(Color::White());
+  trace->ForegroundColor(Color::Black());
+  trace->OnCheckChanged(new EventHandler(MainWindow::_traceChanged, this));
+  trace->Visible(true);
+  emulatorPanel->Add(trace);
 
   timer = new Timer();
   timer->OnTick(new EventHandler(MainWindow::_TimerTick, this));
@@ -307,5 +316,9 @@ void MainWindow::_ordersChanged(void* obj, void* sender, EventArgs args) {
 
 void MainWindow::_tapeButtonPressed(void* obj, void* sender, EventArgs args) {
   ((MainWindow*)obj)->tapeButtonPressed(sender, (MouseEventArgs&)args);
+  }
+
+void MainWindow::_traceChanged(void* obj, void* sender, EventArgs args) {
+  ((MainWindow*)obj)->traceChanged(sender, (ValueEventArgs&)args);
   }
 

@@ -262,7 +262,7 @@ void MainWindow::InitializeComponent() {
   mountTape->Visible(true);
   emulatorPanel->Add(mountTape);
 
-  trace = new CheckBox(emulatorPanel, 110, 170, 150, 30);
+  trace = new CheckBox(emulatorPanel, 25, emulatorPanel->Height() - 35, 75, 30);
   trace->Text("Trace");
   trace->Checked(false);
   trace->BackgroundColor(Color::White());
@@ -270,6 +270,24 @@ void MainWindow::InitializeComponent() {
   trace->OnCheckChanged(new EventHandler(MainWindow::_traceChanged, this));
   trace->Visible(true);
   emulatorPanel->Add(trace);
+
+  use1949 = new RadioButton(emulatorPanel, 125, emulatorPanel->Height()-35, 75, 30);
+  use1949->Text("1949");
+  use1949->Checked(cpu->Only1949());
+  use1949->BackgroundColor(Color::White());
+  use1949->ForegroundColor(Color::Black());
+  use1949->Visible(true);
+  use1949->OnCheckChanged(new EventHandler(MainWindow::_useChanged, this));
+  emulatorPanel->Add(use1949);
+
+  use1957 = new RadioButton(emulatorPanel, 200, emulatorPanel->Height()-35, 75, 30);
+  use1957->Text("1957");
+  use1957->Checked(!cpu->Only1949());
+  use1957->BackgroundColor(Color::White());
+  use1957->ForegroundColor(Color::Black());
+  use1957->Visible(true);
+  use1957->OnCheckChanged(new EventHandler(MainWindow::_useChanged, this));
+  emulatorPanel->Add(use1957);
 
   timer = new Timer();
   timer->OnTick(new EventHandler(MainWindow::_TimerTick, this));
@@ -320,5 +338,9 @@ void MainWindow::_tapeButtonPressed(void* obj, void* sender, EventArgs args) {
 
 void MainWindow::_traceChanged(void* obj, void* sender, EventArgs args) {
   ((MainWindow*)obj)->traceChanged(sender, (ValueEventArgs&)args);
+  }
+
+void MainWindow::_useChanged(void* obj, void* sender, EventArgs args) {
+  ((MainWindow*)obj)->useChanged(sender, (ValueEventArgs&)args);
   }
 

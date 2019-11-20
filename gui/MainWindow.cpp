@@ -73,6 +73,11 @@ void MainWindow::traceChanged(void* sender, ValueEventArgs args) {
     else cpu->Trace('N');
   }
 
+void MainWindow::useChanged(void* sender, ValueEventArgs args) {
+  if (use1949->Checked()) cpu->Only1949(true);
+    else cpu->Only1949(false);
+  }
+
 Int32 MainWindow::InitialOrders() {
   return initialOrders->SelectedIndex() + 1;
   }

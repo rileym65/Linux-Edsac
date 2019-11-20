@@ -36,6 +36,8 @@ class MainWindow : public Form {
     DropDownList *initialOrders;
     Button       *mountTape;
     CheckBox     *trace;
+    RadioButton  *use1949;
+    RadioButton  *use1957;
     void InitializeComponent();
     void clearButtonPressed(void* sender, MouseEventArgs args);
     void resetButtonPressed(void* sender, MouseEventArgs args);
@@ -47,6 +49,7 @@ class MainWindow : public Form {
     void ordersChanged(void* sender, ValueEventArgs args);
     void tapeButtonPressed(void* sender, MouseEventArgs args);
     void traceChanged(void* sender, ValueEventArgs args);
+    void useChanged(void* sender, ValueEventArgs args);
     void TimerTick(void* sender);
     void static _clearButtonPressed(void* obj, void* sender, EventArgs args);
     void static _resetButtonPressed(void* obj, void* sender, EventArgs args);
@@ -59,6 +62,7 @@ class MainWindow : public Form {
     void static _ordersChanged(void* obj, void* sender, EventArgs args);
     void static _tapeButtonPressed(void* obj, void* sender, EventArgs args);
     void static _traceChanged(void* obj, void* sender, EventArgs args);
+    void static _useChanged(void* obj, void* sender, EventArgs args);
   public:
     MainWindow(int w, int h);
     ~MainWindow();

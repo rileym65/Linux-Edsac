@@ -1,7 +1,7 @@
 PROJECT = edsac
 CC = g++
 LINK = g++
-DEFS = -pthread
+DEFS = -pthread -std=c++11
 LIBDIR =
 LIBS = -lSmrFramework
 INCDIR = -I. -I../common/

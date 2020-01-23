@@ -3,7 +3,8 @@ CC = g++
 LINK = g++
 DEFS = -pthread -std=c++11 -Wall
 LIBDIR =
-LIBS = -lSmrFramework -lSmrAppFramework -lX11 -lXft
+#LIBS = -lSmrFramework -lSmrAppFramework -lX11 -lXft
+LIBS = -lSmrFramework -lSmrAppFramework -lX11
 INCDIR = -I. -I../common/ -I/usr/include/freetype2
 INCS =
 OBJS = \

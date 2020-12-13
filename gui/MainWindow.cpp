@@ -64,8 +64,12 @@ void MainWindow::tankEvent(void* sender, ValueEventArgs args) {
 void MainWindow::ordersChanged(void* sender, ValueEventArgs args) {
   UInt32 number;
   number = args.Value();
-  if (number == 1) initialOrders->SelectedIndex(0);
-  if (number == 2) initialOrders->SelectedIndex(1);
+  if (number == 0) {
+    cpu->LoadOrders1();
+    }
+  if (number == 1) {
+    cpu->LoadOrders2();
+    }
   }
 
 void MainWindow::traceChanged(void* sender, ValueEventArgs args) {
